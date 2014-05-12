@@ -48,6 +48,7 @@ static struct {
 	"dragonfly",	Hdragonfly,
 	"elf",		Helf,
 	"freebsd",	Hfreebsd,
+	"haiku", 	Hhaiku,
 	"linux",	Hlinux,
 	"nacl",		Hnacl,
 	"netbsd",	Hnetbsd,
@@ -173,6 +174,9 @@ linknew(LinkArch *arch)
 			ctxt->tlsoffset = 0x468;
 			break;
 		}
+		break;
+	case Hhaiku:
+		ctxt->tlsoffset = 0x30; /* Hhaiku fixme */
 		break;
 	}
 	

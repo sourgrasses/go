@@ -155,7 +155,7 @@ relocsym(LSym *s)
 			continue;
 
 		// Solaris needs the ability to reference dynimport symbols.
-		if(HEADTYPE != Hsolaris && r->sym != S && r->sym->type == SDYNIMPORT)
+		if(HEADTYPE != Hsolaris && HEADTYPE != Hhaiku && r->sym != S && r->sym->type == SDYNIMPORT)
 			diag("unhandled relocation for %s (type %d rtype %d)", r->sym->name, r->sym->type, r->type);
 		if(r->sym != S && r->sym->type != STLSBSS && !r->sym->reachable)
 			diag("unreachable sym in relocation: %s %s", s->name, r->sym->name);

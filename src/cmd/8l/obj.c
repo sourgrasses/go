@@ -67,6 +67,7 @@ archinit(void)
 	case Hlinux:
 	case Hnetbsd:
 	case Hopenbsd:
+	case Hhaiku:
 		break;
 	}
 
@@ -99,6 +100,7 @@ archinit(void)
 	case Hnetbsd:
 	case Hopenbsd:
 	case Hdragonfly:
+	case Hhaiku:
 		elfinit();
 		HEADR = ELFRESERVE;
 		if(INITTEXT == -1)

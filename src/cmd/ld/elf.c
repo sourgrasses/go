@@ -1209,6 +1209,10 @@ asmbelf(vlong symo)
 			case Hsolaris:
 				interpreter = solarisdynld;
 				break;
+			case Hhaiku:
+				/* FIXME FIXME FIXME */
+				interpreter = linuxdynld;
+				break;
 			}
 		}
 		resoff -= elfinterp(sh, startva, resoff, interpreter);

@@ -1472,6 +1472,8 @@ prefixof(Link *ctxt, Addr *a)
 		case Hnetbsd:
 		case Hopenbsd:
 			return 0x65; // GS
+		case Hhaiku:
+			return 0x64; // FS
 		}
 	}
 	return 0;
