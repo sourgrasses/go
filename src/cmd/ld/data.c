@@ -184,7 +184,7 @@ relocsym(LSym *s)
 				o = r->add;
 			break;
 		case R_TLS_LE:
-			if(linkmode == LinkExternal && iself && HEADTYPE != Hopenbsd) {
+			if(linkmode == LinkExternal && iself && HEADTYPE != Hopenbsd && HEADTYPE != Hhaiku) {
 				r->done = 0;
 				r->sym = ctxt->gmsym;
 				r->xsym = ctxt->gmsym;
@@ -198,7 +198,7 @@ relocsym(LSym *s)
 			break;
 
 		case R_TLS_IE:
-			if(linkmode == LinkExternal && iself && HEADTYPE != Hopenbsd) {
+			if(linkmode == LinkExternal && iself && HEADTYPE != Hopenbsd && HEADTYPE != Hhaiku) {
 				r->done = 0;
 				r->sym = ctxt->gmsym;
 				r->xsym = ctxt->gmsym;
@@ -937,7 +937,7 @@ dodata(void)
 		diag("data or bss segment too large");
 	}
 	
-	if(iself && linkmode == LinkExternal && s != nil && s->type == STLSBSS && HEADTYPE != Hopenbsd) {
+	if(iself && linkmode == LinkExternal && s != nil && s->type == STLSBSS && HEADTYPE != Hopenbsd && HEADTYPE != Hhaiku) {
 		sect = addsection(&segdata, ".tbss", 06);
 		sect->align = PtrSize;
 		sect->vaddr = 0;

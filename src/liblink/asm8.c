@@ -1472,8 +1472,6 @@ prefixof(Link *ctxt, Addr *a)
 		case Hnetbsd:
 		case Hopenbsd:
 			return 0x65; // GS
-		case Hhaiku:
-			return 0x64; // FS
 		}
 	}
 	return 0;
@@ -2731,6 +2729,18 @@ mfound:
 			*ctxt->andptr++ = 0x8B;
 			asmand(ctxt, &pp.from, reg[p->to.type]);
 			break;
+		case Hhaiku: /* FIXME tls offset please */
+			// Haiku TLS base is 0x14(FS) for now.
+			pp.from = p->from;
+			pp.from.type = D_INDIR+D_FS;
+			pp.from.offset = 0x14;
+			pp.from.index = D_NONE;
+			pp.from.scale = 0;
+			*ctxt->andptr++ = 0x64; // FS
+			*ctxt->andptr++ = 0x8B;
+			asmand(ctxt, &pp.from, reg[p->to.type]);
+			break;
+
 		}
 		break;
 	}

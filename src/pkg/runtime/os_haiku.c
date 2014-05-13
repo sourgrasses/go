@@ -128,6 +128,7 @@ getncpu(void)
 void
 runtime·osinit(void)
 {
+	runtime·throw("FAILBOATS");
 	runtime·ncpu = getncpu(); 
 }
 
@@ -589,9 +590,4 @@ void
 runtime·osyield(void)
 {
 	runtime·sysvicall6(libc·sched_yield, 0);
-}
-
-#pragma textflag NOSPLIT
-void
-runtime·setldt(void) {
 }

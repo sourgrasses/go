@@ -131,6 +131,7 @@ linknew(LinkArch *arch)
 		ctxt->tlsoffset = -2*ctxt->arch->ptrsize;
 		break;
 	case Hwindows:
+	case Hhaiku: /* FIXME */
 		break;
 	case Hlinux:
 	case Hfreebsd:
@@ -174,9 +175,6 @@ linknew(LinkArch *arch)
 			ctxt->tlsoffset = 0x468;
 			break;
 		}
-		break;
-	case Hhaiku:
-		ctxt->tlsoffset = 0x30; /* Hhaiku fixme */
 		break;
 	}
 	

@@ -99,6 +99,7 @@ canuselocaltls(Link *ctxt)
 	case Hnacl:
 	case Hplan9:
 	case Hwindows:
+	case Hhaiku:
 		return 0;
 	}
 	return 1;
