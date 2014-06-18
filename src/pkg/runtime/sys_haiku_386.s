@@ -42,6 +42,35 @@ TEXT runtime·asmsysvicall6(SB),NOSPLIT,$0
 	//MOVL	AX, libcall_err(BX)
 
 	RET
+
+// uint32 tstart_sysvicall(M *newm);
+TEXT runtime·tstart_sysvicall(SB),NOSPLIT,$0
+	MOVL	newm+4(SP), CX		// m
+	MOVL	m_g0(CX), DX		// g
+
+	// Make TLS entries point at g and m.
+	//get_tls(BX)
+	LEAL	m_tls(CX), BX
+	MOVL	BX, 0x14(FS) //TODO: Fix this so that I'm not hardcoding a TLS slot
+	MOVL	CX, g(BX)
+	MOVL	DX, m(BX)
+
+	// Layout new m scheduler stack on os stack.
+	MOVL	SP, AX
+	MOVL	AX, g_stackbase(DX)
+	SUBL	$(64*1024), AX		// stack size
+	MOVL	AX, g_stackguard(DX)
+	MOVL	AX, g_stackguard0(DX)
+
+	// Someday the convention will be D is always cleared.
+	CLD
+
+	CALL	runtime·stackcheck(SB)	// clobbers AX,CX
+	CALL	runtime·mstart(SB)
+
+	XORL	AX, AX			// return 0 == success
+
+	RET
 	
 // setldt(int entry, int address, int limit)
 TEXT runtime·setldt(SB),NOSPLIT,$0

@@ -12,9 +12,10 @@ enum {
 	PROT_WRITE	= 0x2,
 	PROT_EXEC	= 0x4,
 
-	MAP_ANON	= 0x20,
+	MAP_SHARED	= 0x1,
 	MAP_PRIVATE	= 0x2,
-	MAP_FIXED	= 0x10,
+	MAP_FIXED	= 0x4,
+	MAP_ANON	= 0x8,
 
 	MADV_DONTNEED	= 0x4,
 
@@ -87,6 +88,7 @@ enum {
 	EPOLL_CTL_ADD	= 0x1,
 	EPOLL_CTL_DEL	= 0x2,
 	EPOLL_CTL_MOD	= 0x3,
+	PTHREAD_CREATE_DETACHED = 0x1,
 };
 
 typedef struct Fpreg Fpreg;
