@@ -247,14 +247,15 @@ func (w WaitStatus) StopSignal() Signal {
 
 func (w WaitStatus) TrapCause() int { return -1 }
 
-func wait4(pid uintptr, wstatus *WaitStatus, options uintptr, rusage *Rusage) (wpid uintptr, err uintptr)
+/*func wait4(pid uintptr, wstatus *WaitStatus, options uintptr, rusage *Rusage) (wpid uintptr, err uintptr)*/
 
 func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error) {
-	r0, e1 := wait4(uintptr(pid), wstatus, uintptr(options), rusage)
+	/*r0, e1 := wait4(uintptr(pid), wstatus, uintptr(options), rusage)
 	if e1 != 0 {
 		err = Errno(e1)
 	}
-	return int(r0), err
+	return int(r0), err*/
+	panic("Wait4 not supported yet")
 }
 
 func gethostname() (name string, err uintptr)

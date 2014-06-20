@@ -305,14 +305,15 @@ func setpgid(pid uintptr, pgid uintptr) (err uintptr) {
 
 #pragma textflag NOSPLIT
 func forkx(flags uintptr) (pid uintptr, err uintptr) {
-	LibCall c;
+	/*LibCall c;
 
 	c.fn = (void*)(uintptr) &libc·forkx;
 	c.n = 1;
 	c.args = (void*)&flags;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
 	err = c.err;
-	pid = c.r1;
+	pid = c.r1;*/
+	runtime·throw("Forkx not supported");
 }
 
 void runtime·pipe1(void);

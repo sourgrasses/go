@@ -597,3 +597,11 @@ runtime·osyield(void)
 {
 	runtime·sysvicall6((uintptr) &libc·sched_yield, 0);
 }
+
+
+// STUB
+void
+runtime·pipe1(void)
+{
+	runtime·throw("Pipe not implemented");
+}
