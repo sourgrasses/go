@@ -89,6 +89,7 @@ enum {
 	EPOLL_CTL_DEL	= 0x2,
 	EPOLL_CTL_MOD	= 0x3,
 	PTHREAD_CREATE_DETACHED = 0x1,
+	MAXHOSTNAMELEN = 0x100,
 };
 
 typedef struct Fpreg Fpreg;
