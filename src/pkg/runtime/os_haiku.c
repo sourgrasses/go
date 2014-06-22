@@ -146,7 +146,7 @@ runtime·newosproc(M *mp, void *stk)
 	//if(runtime·pthread_attr_setstack(&attr, 0, 0x200000) != 0)
 	//	runtime·throw("pthread_attr_setstack");
 	//if(runtime·pthread_attr_getstack(&attr, (void**)&mp->g0->stackbase, &mp->g0->stacksize) != 0)
-	//	runtime·throw("pthread_attr_getstack");	
+	//	runtime·throw("pthread_attr_getstack");
 	if(runtime·pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0)
 		runtime·throw("pthread_attr_setdetachstate");
 
@@ -343,7 +343,6 @@ runtime·unblocksignals(void)
 uintptr
 runtime·semacreate(void)
 {
-	runtime·printf("Create sema\n");
 	SemT* sem;
 
 	// Call libc's malloc rather than runtime·malloc.  This will
@@ -358,7 +357,6 @@ runtime·semacreate(void)
 	sem = (void*)m->libcall.r1;
 	if(runtime·sem_init(sem, 0, 0) != 0)
 		runtime·throw("sem_init");
-	runtime·printf("Create sema done\n");
 	return (uintptr)sem;
 }
 
@@ -366,11 +364,12 @@ runtime·semacreate(void)
 int32
 runtime·semasleep(int64 ns)
 {
-/*	if(ns >= 0) {
+	if(ns >= 0) {
+		/*
 		m->ts.tv_sec = ns / 1000000000LL;
 		m->ts.tv_nsec = ns % 1000000000LL;
 
-		m->libcall.fn = (void*)libc·sem_reltimedwait_np;
+		m->libcall.fn = (void*)(uintptr) &libc·sem_reltimedwait_np;
 		m->libcall.n = 2;
 		runtime·memclr((byte*)&m->scratch, sizeof(m->scratch));
 		m->scratch.v[0] = m->waitsema;
@@ -383,9 +382,12 @@ runtime·semasleep(int64 ns)
 			runtime·throw("sem_reltimedwait_np");
 		}
 		return 0;
+		*/
+		runtime·throw("Todo: implement semasleep");
+		return -1;
 	}
 	for(;;) {
-		m->libcall.fn = (void*)libc·sem_wait;
+		m->libcall.fn = (void*)(uintptr) &libc·sem_wait;
 		m->libcall.n = 1;
 		runtime·memclr((byte*)&m->scratch, sizeof(m->scratch));
 		m->scratch.v[0] = m->waitsema;
@@ -393,11 +395,10 @@ runtime·semasleep(int64 ns)
 		runtime·asmcgocall(runtime·asmsysvicall6, &m->libcall);
 		if(m->libcall.r1 == 0)
 			break;
-		if(*m->perrno == EINTR) 
-			continue;
+		//if(*m->perrno == EINTR) 
+		//	continue;
 		runtime·throw("sem_wait");
 	}
-*/
 	return 0;
 }
 

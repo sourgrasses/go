@@ -747,6 +747,17 @@ settls:
 	LEAL	m_tls(AX), AX
 	MOVL	AX, 0x14(FS)
 #endif
+#ifdef GOOS_haiku
+//FIXME: fix this kludge
+	MOVL	mm+0(FP), AX
+	CMPL	AX, $0
+	JNE	settls
+	MOVL	$0, 0x14(FS)
+	RET
+settls:
+	LEAL	m_tls(AX), AX
+	MOVL	AX, 0x14(FS)
+#endif
 	MOVL	mm+0(FP), AX
 	get_tls(CX)
 	MOVL	mm+0(FP), AX

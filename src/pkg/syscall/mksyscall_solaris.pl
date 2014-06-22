@@ -22,6 +22,7 @@ use strict;
 my $cmdline = "mksyscall_solaris.pl " . join(' ', @ARGV);
 my $errors = 0;
 my $_32bit = "";
+my $default_modname = "libc";
 
 binmode STDOUT;
 
@@ -30,6 +31,12 @@ if($ARGV[0] eq "-b32") {
 	shift;
 } elsif($ARGV[0] eq "-l32") {
 	$_32bit = "little-endian";
+	shift;
+}
+
+if ($ARGV[0] eq "-modname") {
+	$default_modname = "$ARGV[1]";
+	shift;
 	shift;
 }
 
@@ -91,7 +98,7 @@ while(<>) {
 
 	# So file name.
 	if($modname eq "") {
-		$modname = "libc";
+		$modname = "$default_modname";
 	}
 	my $modvname = "mod$modname";
 	if($modnames !~ /$modname/) {

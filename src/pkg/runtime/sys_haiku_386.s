@@ -52,8 +52,8 @@ TEXT runtime·tstart_sysvicall(SB),NOSPLIT,$0
 	//get_tls(BX)
 	LEAL	m_tls(CX), BX
 	MOVL	BX, 0x14(FS) //TODO: Fix this so that I'm not hardcoding a TLS slot
-	MOVL	CX, g(BX)
-	MOVL	DX, m(BX)
+	MOVL	CX, m(BX)
+	MOVL	DX, g(BX)
 
 	// Layout new m scheduler stack on os stack.
 	MOVL	SP, AX

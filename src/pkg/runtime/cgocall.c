@@ -99,7 +99,7 @@ runtime·cgocall(void (*fn)(void*), void *arg)
 {
 	Defer d;
 
-	if(!runtime·iscgo && !Solaris && !Windows)
+	if(!runtime·iscgo && !Solaris && !Windows && !Haiku)
 		runtime·throw("cgocall unavailable");
 
 	if(fn == 0)

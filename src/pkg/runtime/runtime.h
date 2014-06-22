@@ -521,6 +521,16 @@ enum {
 };
 #endif
 
+#ifdef GOOS_haiku
+enum {
+   Haiku = 1
+};
+#else
+enum {
+   Haiku = 0
+};
+#endif
+
 struct	Timers
 {
 	Lock;
