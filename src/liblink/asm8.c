@@ -2730,10 +2730,10 @@ mfound:
 			asmand(ctxt, &pp.from, reg[p->to.type]);
 			break;
 		case Hhaiku: /* FIXME tls offset please */
-			// Haiku TLS base is 0x14(FS) for now.
+			// Haiku TLS base is 0xfc(FS) for now. This is TLS slot 63, the last slot.
 			pp.from = p->from;
 			pp.from.type = D_INDIR+D_FS;
-			pp.from.offset = 0x14;
+			pp.from.offset = 0xfc;
 			pp.from.index = D_NONE;
 			pp.from.scale = 0;
 			*ctxt->andptr++ = 0x64; // FS

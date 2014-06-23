@@ -94,18 +94,19 @@ type Rlimit struct {
 type _Gid_t uint32
 
 type Stat_t struct {
-	Dev       uint64
-	X__pad1   uint16
-	Pad_cgo_0 [2]byte
+	Dev       uint32
+	X__pad1   uint32
 	X__st_ino uint32
 	Mode      uint32
 	Nlink     uint32
 	Uid       uint32
 	Gid       uint32
-	Rdev      uint64
+	X__pad11  uint32
+	Size      int64
+	Rdev      uint32
 	X__pad2   uint16
 	Pad_cgo_1 [2]byte
-	Size      int64
+
 	Blksize   int32
 	Blocks    int64
 	Atim      Timespec

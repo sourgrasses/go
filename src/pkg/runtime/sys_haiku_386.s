@@ -70,7 +70,7 @@ TEXT runtime·tstart_sysvicall(SB),NOSPLIT,$0
 	// Make TLS entries point at g and m.
 	//get_tls(BX)
 	LEAL	m_tls(CX), BX
-	MOVL	BX, 0x14(FS) //TODO: Fix this so that I'm not hardcoding a TLS slot
+	MOVL	BX, 0xfc(FS) //TODO: Fix this so that I'm not hardcoding a TLS slot
 	MOVL	CX, m(BX)
 	MOVL	DX, g(BX)
 
@@ -94,5 +94,5 @@ TEXT runtime·tstart_sysvicall(SB),NOSPLIT,$0
 // setldt(int entry, int address, int limit)
 TEXT runtime·setldt(SB),NOSPLIT,$0
 	MOVL	address+4(FP), CX
-	MOVL	CX, 0x14(FS)
+	MOVL	CX, 0xfc(FS)
 	RET

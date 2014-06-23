@@ -28,7 +28,6 @@ var (
 	procFchown = modlibroot.NewProc("fchown")
 	procFpathconf = modlibroot.NewProc("fpathconf")
 	procFstat = modlibroot.NewProc("fstat")
-	procGetdents = modlibroot.NewProc("getdents")
 	procGetgid = modlibroot.NewProc("getgid")
 	procGetpid = modlibroot.NewProc("getpid")
 	procGeteuid = modlibroot.NewProc("geteuid")
@@ -89,6 +88,7 @@ var (
 	procsetsockopt = modlibsocket.NewProc("setsockopt")
 	procrecvfrom = modlibsocket.NewProc("recvfrom")
 	procrecvmsg = modlibsocket.NewProc("recvmsg")
+	proc_kern_read_dir = modlibroot.NewProc("_kern_read_dir")
 
 )
 
@@ -266,19 +266,6 @@ func Fpathconf(fd int, name int) (val int, err error) {
 
 func Fstat(fd int, stat *Stat_t) (err error) {
 	_, _, e1 := sysvicall6(procFstat.Addr(), 2, uintptr(fd), uintptr(unsafe.Pointer(stat)), 0, 0, 0, 0)
-	if e1 != 0 {
-		err = e1
-	}
-	return
-}
-
-func Getdents(fd int, buf []byte, basep *uintptr) (n int, err error) {
-	var _p0 *byte
-	if len(buf) > 0 {
-		_p0 = &buf[0]
-	}
-	r0, _, e1 := sysvicall6(procGetdents.Addr(), 4, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(buf)), uintptr(unsafe.Pointer(basep)), 0, 0)
-	n = int(r0)
 	if e1 != 0 {
 		err = e1
 	}
@@ -876,6 +863,19 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 
 func recvmsg(s int, msg *Msghdr, flags int) (n int, err error) {
 	r0, _, e1 := sysvicall6(procrecvmsg.Addr(), 3, uintptr(s), uintptr(unsafe.Pointer(msg)), uintptr(flags), 0, 0, 0)
+	n = int(r0)
+	if e1 != 0 {
+		err = e1
+	}
+	return
+}
+
+func kern_read_dir(fd int, buf []byte, max_count int) (n int, err error) {
+	var _p0 *byte
+	if len(buf) > 0 {
+		_p0 = &buf[0]
+	}
+	r0, _, e1 := sysvicall6(proc_kern_read_dir.Addr(), 4, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(buf)), uintptr(max_count), 0, 0)
 	n = int(r0)
 	if e1 != 0 {
 		err = e1
