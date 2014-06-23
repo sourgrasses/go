@@ -506,6 +506,8 @@ static FuncVal forcegchelperv = {(void(*)(void))forcegchelper};
 void
 runtime·MHeap_Scavenger(void)
 {
+	/*
+	FIXME: Garbage collection disabled
 	MHeap *h;
 	uint64 tick, now, forcegc, limit;
 	int64 unixnow;
@@ -549,7 +551,7 @@ runtime·MHeap_Scavenger(void)
 		now = runtime·nanotime();
 		scavenge(k, now, limit);
 		runtime·unlock(h);
-	}
+	}*/
 }
 
 void

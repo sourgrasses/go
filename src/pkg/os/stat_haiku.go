@@ -10,12 +10,47 @@ import (
 )
 
 func sameFile(fs1, fs2 *fileStat) bool {
-	//STUB
-	panic("Not implemented")
+	stat1 := fs1.sys.(*syscall.Stat_t)
+	stat2 := fs2.sys.(*syscall.Stat_t)
+	return stat1.Dev == stat2.Dev && stat1.Ino == stat2.Ino
 }
 
 func fileInfoFromStat(st *syscall.Stat_t, name string) FileInfo {
-	panic("Not implemented")
+	fs := &fileStat{
+		name:    basename(name),
+		size:    int64(st.Size),
+		modTime: timespecToTime(st.Mtim),
+		sys:     st,
+	}
+	fs.mode = FileMode(st.Mode & 0777)
+	/*
+	switch st.Mode & syscall.S_IFMT {
+	case syscall.S_IFBLK:
+		fs.mode |= ModeDevice
+	case syscall.S_IFCHR:
+		fs.mode |= ModeDevice | ModeCharDevice
+	case syscall.S_IFDIR:
+		fs.mode |= ModeDir
+	case syscall.S_IFIFO:
+		fs.mode |= ModeNamedPipe
+	case syscall.S_IFLNK:
+		fs.mode |= ModeSymlink
+	case syscall.S_IFREG:
+		// nothing to do
+	case syscall.S_IFSOCK:
+		fs.mode |= ModeSocket
+	}
+	if st.Mode&syscall.S_ISGID != 0 {
+		fs.mode |= ModeSetgid
+	}
+	if st.Mode&syscall.S_ISUID != 0 {
+		fs.mode |= ModeSetuid
+	}
+	if st.Mode&syscall.S_ISVTX != 0 {
+		fs.mode |= ModeSticky
+	}
+	*/
+	return fs
 }
 
 func timespecToTime(ts syscall.Timespec) time.Time {
@@ -24,5 +59,5 @@ func timespecToTime(ts syscall.Timespec) time.Time {
 
 // For testing.
 func atime(fi FileInfo) time.Time {
-	panic("Not implemented")
+	return timespecToTime(fi.Sys().(*syscall.Stat_t).Atim)
 }

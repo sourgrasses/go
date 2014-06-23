@@ -8,13 +8,30 @@
 
 #include "zasm_GOOS_GOARCH.h"
 #include "../../cmd/ld/textflag.h"
+
+// void libc·miniterrno(void *(*___errno)(void));
+//
+// Set the TLS errno pointer in M.
+//
+// Called using runtime·asmcgocall from os_solaris.c:/minit.
+TEXT runtime·miniterrno(SB),NOSPLIT,$0
+	// FIXME: implement
+	RET
+	MOVL	4(SP), DI
+	CALL	DI	// SysV ABI so returns in AX
+	get_tls(CX)
+	MOVL	m(CX), BX
+	MOVL	AX,	m_perrno(BX)
+	RET
+
+
 TEXT runtime·asmsysvicall6(SB),NOSPLIT,$0
 // void runtime·asmstdcall(void *c);
 //TEXT runtime·asmstdcall(SB),NOSPLIT,$0
 	MOVL	c+0(FP), BX
 
 	// SetLastError(0).
-	MOVL	$0, 0x34(FS)
+	//MOVL	$0, 0x34(FS)
 
 	// Copy args to the stack.
 	MOVL	SP, BP
@@ -39,7 +56,9 @@ TEXT runtime·asmsysvicall6(SB),NOSPLIT,$0
 
 	// GetLastError().
 	//MOVL	0x34(FS), AX
-	//MOVL	AX, libcall_err(BX)
+	MOVL	$0, AX
+	MOVL	AX, libcall_err(BX)
+	//FIXME: implement this
 
 	RET
 
