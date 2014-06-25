@@ -131,12 +131,12 @@ type Statfs_t struct {
 }
 
 type Dirent struct {
-	Ino       uint64
-	Off       int64
+	Dev       int32
+	Pdev      int32
+	Ino       int64
+	Pino      int64
 	Reclen    uint16
-	Type      uint8
-	Name      [256]int8
-	Pad_cgo_0 [1]byte
+	Name      [256+1]int8
 }
 
 type Fsid struct {

@@ -191,9 +191,7 @@ func Setgroups(gids []int) (err error) {
 }
 
 func ReadDirent(fd int, buf []byte) (n int, err error) {
-	// Final argument is (basep *uintptr) and the syscall doesn't take nil.
-	// TODO(rsc): Can we use a single global basep for all calls?
-	return kern_read_dir(fd, buf, 1)
+	panic("Not implemented")
 }
 
 // Wait status is 7 bits at bottom, either 0 (exited),
@@ -504,8 +502,9 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error) = libsocket.recvfrom
 //sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error) = libsocket.recvmsg
 
-//FIXME: don't use possibly unstable syscall wrappers directly
-//sys	kern_read_dir(fd int, buf []byte, max_count int) (n int, err error) = _kern_read_dir
+//sys	Fdopendir(fd int) (dir unsafe.Pointer, err error)
+//sys	Readdir_r(dir unsafe.Pointer, entry *Dirent, result **Dirent) (status int)
+//sys	Closedir(dir unsafe.Pointer) (status int, err error)
 
 func readlen(fd int, buf *byte, nbuf int) (n int, err error) {
 	r0, _, e1 := sysvicall6(procread.Addr(), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)
