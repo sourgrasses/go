@@ -13,7 +13,7 @@
 #pragma dynexport etext _etext
 #pragma dynexport edata _edata
 
-#pragma dynimport libc·___errno ___errno "libroot.so"
+#pragma dynimport libc·_errnop _errnop "libroot.so"
 #pragma dynimport libc·clock_gettime clock_gettime "libroot.so"
 #pragma dynimport libc·close close "libroot.so"
 #pragma dynimport libc·exit exit "libroot.so"
@@ -46,7 +46,7 @@
 #pragma dynimport libc·usleep usleep "libroot.so"
 #pragma dynimport libc·write write "libroot.so"
 
-extern uintptr libc·___errno;
+extern uintptr libc·_errnop;
 extern uintptr libc·clock_gettime;
 extern uintptr libc·close;
 extern uintptr libc·exit;
@@ -114,10 +114,10 @@ runtime·sysvicall6(uintptr fn, int32 count, ...)
 }
 
 static int32
-getncpu(void) 
+getncpu(void)
 {
 /*	int32 n;
-	
+
 	n = (int32)runtime·sysconf(_SC_NPROCESSORS_ONLN);
 	if(n < 1)
 		return 1;
@@ -129,7 +129,7 @@ getncpu(void)
 void
 runtime·osinit(void)
 {
-	runtime·ncpu = getncpu(); 
+	runtime·ncpu = getncpu();
 }
 
 void
@@ -198,7 +198,7 @@ runtime·mpreinit(M *mp)
 void
 runtime·minit(void)
 {
-	//runtime·asmcgocall(runtime·miniterrno, (void *)libc·___errno);
+	runtime·asmcgocall(runtime·miniterrno, (void *) &libc·_errnop);
 	// Initialize signal handling
 	runtime·signalstack((byte*)m->gsignal->stackguard - StackGuard, 32*1024);
 	//runtime·sigprocmask(SIG_SETMASK, &sigset_none, nil);
@@ -253,7 +253,7 @@ runtime·memlimit(void)
 	/*Rlimit rl;
 	extern byte text[], end[];
 	uintptr used;
-	
+
 	if(runtime·getrlimit(RLIMIT_AS, &rl) != 0)
 		return 0;
 	if(rl.rlim_cur >= 0x7fffffff)
@@ -395,7 +395,7 @@ runtime·semasleep(int64 ns)
 		runtime·asmcgocall(runtime·asmsysvicall6, &m->libcall);
 		if(m->libcall.r1 == 0)
 			break;
-		//if(*m->perrno == EINTR) 
+		//if(*m->perrno == EINTR)
 		//	continue;
 		runtime·throw("sem_wait");
 	}

@@ -15,8 +15,6 @@
 //
 // Called using runtime·asmcgocall from os_solaris.c:/minit.
 TEXT runtime·miniterrno(SB),NOSPLIT,$0
-	// FIXME: implement
-	RET
 	MOVL	4(SP), DI
 	CALL	DI	// SysV ABI so returns in AX
 	get_tls(CX)
@@ -28,11 +26,15 @@ TEXT runtime·miniterrno(SB),NOSPLIT,$0
 TEXT runtime·asmsysvicall6(SB),NOSPLIT,$0
 // void runtime·asmstdcall(void *c);
 //TEXT runtime·asmstdcall(SB),NOSPLIT,$0
+	get_tls(CX)
+	MOVL	m(CX), BX
+	MOVL	m_perrno(BX), DX
+	CMPL	DX, $0
+	JEQ	skiperrno1
+	// reset errno to 0
+	MOVL	$0, 0(DX)
+skiperrno1:
 	MOVL	c+0(FP), BX
-
-	// SetLastError(0).
-	//MOVL	$0, 0x34(FS)
-
 	// Copy args to the stack.
 	MOVL	SP, BP
 	MOVL	libcall_n(BX), CX	// words
@@ -54,12 +56,15 @@ TEXT runtime·asmsysvicall6(SB),NOSPLIT,$0
 	MOVL	AX, libcall_r1(BX)
 	MOVL	DX, libcall_r2(BX)
 
-	// GetLastError().
-	//MOVL	0x34(FS), AX
-	MOVL	$0, AX
+	// copy over errno
+	get_tls(CX)
+	MOVL	m(CX), AX
+	MOVL	m_perrno(AX), AX
+	CMPL	AX, $0
+	JEQ	skiperrno2
+	MOVL	0(AX), AX
 	MOVL	AX, libcall_err(BX)
-	//FIXME: implement this
-
+skiperrno2:
 	RET
 
 // uint32 tstart_sysvicall(M *newm);
@@ -90,7 +95,7 @@ TEXT runtime·tstart_sysvicall(SB),NOSPLIT,$0
 	XORL	AX, AX			// return 0 == success
 
 	RET
-	
+
 // setldt(int entry, int address, int limit)
 TEXT runtime·setldt(SB),NOSPLIT,$0
 	MOVL	address+4(FP), CX
