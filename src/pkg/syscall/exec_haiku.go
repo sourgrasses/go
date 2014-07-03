@@ -55,7 +55,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		r1     uintptr
 		err1   Errno
 		nextfd int
-		i      int
+		//i      int
 	)
 
 	// guard against side effects of shuffling fds below.
@@ -88,7 +88,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 
 	// Fork succeeded, now in child.
 
-	// Session ID
+	/*// Session ID
 	if sys.Setsid {
 		_, err1 = setsid()
 		if err1 != 0 {
@@ -212,7 +212,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		if err1 != 0 {
 			goto childerror
 		}
-	}
+	}*/
 
 	// Time to exec.
 	err1 = execve(
@@ -220,7 +220,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		uintptr(unsafe.Pointer(&argv[0])),
 		uintptr(unsafe.Pointer(&envv[0])))
 
-childerror:
+/*childerror:*/
 	// send error code on pipe
 	write1(uintptr(pipe), uintptr(unsafe.Pointer(&err1)), unsafe.Sizeof(err1))
 	for {

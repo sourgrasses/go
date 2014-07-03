@@ -62,7 +62,7 @@ func ParseDirent(buf []byte, max int, names []string) (consumed int, count int, 
 	return origlen - len(buf), count, names
 }
 
-func pipe() (r uintptr, w uintptr, err uintptr)
+/*func pipe() (r uintptr, w uintptr, err uintptr)
 
 func Pipe(p []int) (err error) {
 	if len(p) != 2 {
@@ -74,7 +74,7 @@ func Pipe(p []int) (err error) {
 	}
 	p[0], p[1] = int(r0), int(w0)
 	return
-}
+}*/
 
 func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	if sa.Port < 0 || sa.Port > 0xFFFF {
@@ -245,15 +245,14 @@ func (w WaitStatus) StopSignal() Signal {
 
 func (w WaitStatus) TrapCause() int { return -1 }
 
-/*func wait4(pid uintptr, wstatus *WaitStatus, options uintptr, rusage *Rusage) (wpid uintptr, err uintptr)*/
+func wait4(pid uintptr, wstatus *WaitStatus, options uintptr, rusage *Rusage) (wpid uintptr, err uintptr)
 
 func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error) {
-	/*r0, e1 := wait4(uintptr(pid), wstatus, uintptr(options), rusage)
+	r0, e1 := wait4(uintptr(pid), wstatus, uintptr(options), rusage)
 	if e1 != 0 {
 		err = Errno(e1)
 	}
-	return int(r0), err*/
-	panic("Wait4 not supported yet")
+	return int(r0), err
 }
 
 func gethostname() (name string, err uintptr)
@@ -505,6 +504,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	Fdopendir(fd int) (dir unsafe.Pointer, err error)
 //sys	Readdir_r(dir unsafe.Pointer, entry *Dirent, result **Dirent) (status int)
 //sys	Closedir(dir unsafe.Pointer) (status int, err error)
+//sys	Pipe(fds []int) (err error)
 
 func readlen(fd int, buf *byte, nbuf int) (n int, err error) {
 	r0, _, e1 := sysvicall6(procread.Addr(), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)

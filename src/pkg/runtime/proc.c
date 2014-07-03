@@ -149,13 +149,13 @@ runtime·schedinit(void)
 	runtime·symtabinit();
 	runtime·mallocinit();
 	mcommoninit(m);
-	
+
 	// Initialize the itable value for newErrorCString,
 	// so that the next time it gets called, possibly
 	// in a fault during a garbage collection, it will not
 	// need to allocated memory.
 	runtime·newErrorCString(0, &i);
-	
+
 	// Initialize the cached gotraceback value, since
 	// gotraceback calls getenv, which mallocs on Plan 9.
 	runtime·gotraceback(nil);
@@ -207,7 +207,7 @@ void
 runtime·main(void)
 {
 	Defer d;
-	
+
 	// Max stack size is 1 GB on 64-bit, 250 MB on 32-bit.
 	// Using decimal instead of binary GB and MB because
 	// they look nicer in the stack overflow failure message.
@@ -225,7 +225,7 @@ runtime·main(void)
 	// by calling runtime.LockOSThread during initialization
 	// to preserve the lock.
 	runtime·lockOSThread();
-	
+
 	// Defer unlock so that runtime.Goexit during init does the unlock too.
 	d.fn = &initDone;
 	d.siz = 0;
@@ -309,7 +309,7 @@ runtime·tracebackothers(G *me)
 	uintptr i;
 
 	traceback = runtime·gotraceback(nil);
-	
+
 	// Show the current goroutine first, if we haven't already.
 	if((gp = m->curg) != nil && gp != me) {
 		runtime·printf("\n");
@@ -619,7 +619,7 @@ runtime·mstart(void)
 	// prepare the thread to be able to handle the signals.
 	if(m == &runtime·m0)
 		runtime·initsig();
-	
+
 	if(m->mstartfn)
 		m->mstartfn();
 
@@ -692,7 +692,7 @@ allocg(void)
 {
 	G *gp;
 	static Type *gtype;
-	
+
 	if(gtype == nil) {
 		Eface e;
 		runtime·gc_g_ptr(&e);
@@ -1470,7 +1470,7 @@ goexit0(G *gp)
 	if(m->locked & ~LockExternal) {
 		runtime·printf("invalid m->locked = %d\n", m->locked);
 		runtime·throw("internal lockOSThread error");
-	}	
+	}
 	m->locked = 0;
 	runtime·unwindstack(gp, nil);
 	gfput(m->p, gp);
@@ -2234,7 +2234,7 @@ runtime·sigprof(uint8 *pc, uint8 *sp, uint8 *lr, G *gp, M *mp)
 	// either corresponds to a user g throughout (as in runtime.asmcgocall)
 	// or because it has been arranged to look like a user g frame
 	// (as in runtime.cgocallback_gofunc). In this case, since the entire
-	// transition is a g+SP update, a partial transition updating just one of 
+	// transition is a g+SP update, a partial transition updating just one of
 	// those will be detected by the stack bounds check.
 	//
 	// Second, when returning from a signal handler, the PC and SP updates
@@ -2260,7 +2260,7 @@ runtime·sigprof(uint8 *pc, uint8 *sp, uint8 *lr, G *gp, M *mp)
 	// it in order to reach a consistent state. On ARM, the update of g must be made
 	// in two places (in R10 and also in a TLS slot), so the delayed update would
 	// need to be the SP update. The sigprof handler must read the instruction at
-	// the current PC and if it was the known instruction (for example, JMP BX or 
+	// the current PC and if it was the known instruction (for example, JMP BX or
 	// MOV R2, PC), use that other register in place of the PC value.
 	// The biggest drawback to this solution is that it requires that we can tell
 	// whether it's safe to read from the memory pointed at by PC.
@@ -3137,7 +3137,7 @@ static bool
 haveexperiment(int8 *name)
 {
 	int32 i, j;
-	
+
 	for(i=0; i<sizeof(experiment); i++) {
 		if((i == 0 || experiment[i-1] == ',') && experiment[i] == name[0]) {
 			for(j=0; name[j]; j++)

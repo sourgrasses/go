@@ -26,7 +26,7 @@ addrspace_free(void *v, uintptr n)
 	/*int32 errval;
 	uintptr chunk;
 	uintptr off;
-	
+
 	// NOTE: vec must be just 1 byte long here.
 	// Mincore returns ENOMEM if any of the pages are unmapped,
 	// but we want to know that all of the pages are unmapped.
@@ -111,6 +111,8 @@ runtime·SysFault(void *v, uintptr n)
 	runtime·mmap(v, n, PROT_NONE, MAP_ANON|MAP_PRIVATE|MAP_FIXED, -1, 0);
 }
 
+int32 runtime·kern_reserve_address_range(void* v, int32 address_spec, uintptr n);
+
 void*
 runtime·SysReserve(void *v, uintptr n, bool *reserved)
 {
@@ -132,9 +134,16 @@ runtime·SysReserve(void *v, uintptr n, bool *reserved)
 		return v;
 	}
 
-	p = runtime·mmap(v, n, PROT_NONE, MAP_ANON|MAP_PRIVATE, -1, 0);
-	if((uintptr)p < 4096)
+	int32 status = runtime·kern_reserve_address_range(&p, 0x7 /* B_EXACT_ADDRESS */, 64<<10);
+	//p = runtime·mmap(v, n, PROT_NONE, MAP_ANON|MAP_PRIVATE, -1, 0);
+	//that doesn't work: PROT_NONE still reserves physical memory
+	//so kludge around it until I can figure out what is happening
+	//in this case, reserve 64 KB of memory, because logic.
+	//if((uintptr)p < 4096)
+	//	return nil;
+	if (status) {
 		return nil;
+	}
 	*reserved = true;
 	return p;
 }
@@ -143,7 +152,7 @@ void
 runtime·SysMap(void *v, uintptr n, bool reserved, uint64 *stat)
 {
 	void *p;
-	
+
 	runtime·xadd64(stat, n);
 
 	// On 64-bit, we don't actually have v reserved, so tread carefully.

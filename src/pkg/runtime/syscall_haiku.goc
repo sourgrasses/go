@@ -9,25 +9,25 @@ package syscall
 #include "cgocall.h"
 #include "../../cmd/ld/textflag.h"
 
-#pragma dynimport libc·chdir chdir "libc.so"
-#pragma dynimport libc·chroot chroot "libc.so"
-#pragma dynimport libc·close close "libc.so"
-#pragma dynimport libc·dlclose dlclose "libc.so"
-#pragma dynimport libc·dlopen dlopen "libc.so"
-#pragma dynimport libc·dlsym dlsym "libc.so"
-#pragma dynimport libc·execve execve "libc.so"
-#pragma dynimport libc·fcntl fcntl "libc.so"
-#pragma dynimport libc·gethostname gethostname "libc.so"
-#pragma dynimport libc·ioctl ioctl "libc.so"
-#pragma dynimport libc·pipe pipe "libc.so"
-#pragma dynimport libc·setgid setgid "libc.so"
-#pragma dynimport libc·setgroups setgroups "libc.so"
-#pragma dynimport libc·setsid setsid "libc.so"
-#pragma dynimport libc·setuid setuid "libc.so"
-#pragma dynimport libc·setpgid setsid "libc.so"
-#pragma dynimport libc·syscall syscall "libc.so"
-#pragma dynimport libc·forkx forkx "libc.so"
-#pragma dynimport libc·wait4 wait4 "libc.so"
+#pragma dynimport libc·chdir chdir "libroot.so"
+#pragma dynimport libc·chroot chroot "libroot.so"
+#pragma dynimport libc·close close "libroot.so"
+#pragma dynimport libc·dlclose dlclose "libroot.so"
+#pragma dynimport libc·dlopen dlopen "libroot.so"
+#pragma dynimport libc·dlsym dlsym "libroot.so"
+#pragma dynimport libc·execve execve "libroot.so"
+#pragma dynimport libc·fcntl fcntl "libroot.so"
+#pragma dynimport libc·gethostname gethostname "libroot.so"
+#pragma dynimport libc·ioctl ioctl "libroot.so"
+#pragma dynimport libc·pipe pipe "libroot.so"
+#pragma dynimport libc·setgid setgid "libroot.so"
+#pragma dynimport libc·setgroups setgroups "libroot.so"
+#pragma dynimport libc·setsid setsid "libroot.so"
+#pragma dynimport libc·setuid setuid "libroot.so"
+#pragma dynimport libc·setpgid setsid "libroot.so"
+#pragma dynimport libc·syscall syscall "libroot.so"
+#pragma dynimport libc·fork fork "libroot.so"
+#pragma dynimport libc·waitpid waitpid "libroot.so"
 extern uintptr libc·chdir;
 extern uintptr libc·chroot;
 extern uintptr libc·close;
@@ -46,8 +46,8 @@ extern uintptr libc·setsid;
 extern uintptr libc·setuid;
 extern uintptr libc·setpgid;
 extern uintptr libc·syscall;
-extern uintptr libc·forkx;
-extern uintptr libc·wait4;
+extern uintptr libc·fork;
+extern uintptr libc·waitpid;
 extern uintptr libc·write;
 
 func sysvicall6(func uintptr, nargs uintptr, a1 uintptr, a2 uintptr, a3 uintptr, a4 uintptr, a5 uintptr, a6 uintptr) (r1 uintptr, r2 uintptr, err uintptr)
@@ -91,7 +91,7 @@ func rawSysvicall6(func uintptr, nargs uintptr, a1 uintptr, a2 uintptr, a3 uintp
 func chdir(path uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)libc·chdir;
+	c.fn = (void*)(uintptr) &libc·chdir;
 	c.n = 1;
 	c.args = (void*)&path;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -102,7 +102,7 @@ func chdir(path uintptr) (err uintptr) {
 func chroot1(path uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)libc·chroot;
+	c.fn = (void*)(uintptr) &libc·chroot;
 	c.n = 1;
 	c.args = (void*)&path;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -113,7 +113,7 @@ func chroot1(path uintptr) (err uintptr) {
 func close(fd uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)libc·close;
+	c.fn = (void*)(uintptr) &libc·close;
 	c.n = 1;
 	c.args = (void*)&fd;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -236,9 +236,8 @@ func wait4(pid uintptr, wstatus *uint32, options uintptr, rusage *void) (wpid in
 
 	USED(wstatus);
 	USED(options);
-	USED(rusage);
-	c.fn = (void*)(uintptr) &libc·wait4;
-	c.n = 4;
+	c.fn = (void*)(uintptr) &libc·waitpid;
+	c.n = 3;
 	c.args = (void*)&pid;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
 	err = c.err;
@@ -305,20 +304,20 @@ func setpgid(pid uintptr, pgid uintptr) (err uintptr) {
 
 #pragma textflag NOSPLIT
 func forkx(flags uintptr) (pid uintptr, err uintptr) {
-	/*LibCall c;
+	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·forkx;
-	c.n = 1;
-	c.args = (void*)&flags;
+	c.fn = (void*)(uintptr) &libc·fork;
+	c.n = 0;
+	c.args = (void*)0;//&flags;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
 	err = c.err;
-	pid = c.r1;*/
-	runtime·throw("Forkx not supported");
+	pid = c.r1;
 }
 
 void runtime·pipe1(void);
 
 func pipe() (r uintptr, w uintptr, err uintptr) {
+
 	LibCall c;
 
 	c.fn = (void*)runtime·pipe1;

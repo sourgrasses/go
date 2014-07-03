@@ -101,7 +101,6 @@ type Stat_t struct {
 	Nlink     uint32
 	Uid       uint32
 	Gid       uint32
-	X__pad11  uint32
 	Size      int64
 	Rdev      uint32
 	X__pad2   uint16

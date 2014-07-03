@@ -45,6 +45,7 @@
 #pragma dynimport libc·sysconf sysconf "libroot.so"
 #pragma dynimport libc·usleep usleep "libroot.so"
 #pragma dynimport libc·write write "libroot.so"
+#pragma dynimport libc·_kern_reserve_address_range _kern_reserve_address_range "libroot.so"
 
 extern uintptr libc·_errnop;
 extern uintptr libc·clock_gettime;
@@ -78,6 +79,7 @@ extern uintptr libc·sigprocmask;
 extern uintptr libc·sysconf;
 extern uintptr libc·usleep;
 extern uintptr libc·write;
+extern uintptr libc·_kern_reserve_address_range;
 
 void	runtime·getcontext(Ucontext *context);
 int32	runtime·pthread_attr_destroy(PthreadAttr* attr);
@@ -597,6 +599,12 @@ void
 runtime·osyield(void)
 {
 	runtime·sysvicall6((uintptr) &libc·sched_yield, 0);
+}
+
+int32
+runtime·kern_reserve_address_range(byte* addr, int32 address_spec, uintptr len)
+{
+	return (int32)runtime·sysvicall6((uintptr) &libc·_kern_reserve_address_range, 3, (uintptr)addr, (uintptr) address_spec, (uintptr)len);
 }
 
 
