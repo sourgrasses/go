@@ -344,11 +344,14 @@ func write1(fd uintptr, buf uintptr, nbyte uintptr) (n uintptr, err uintptr) {
 }
 
 func Syscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r2 uintptr, err uintptr) {
-	LibCall c;
+	//LibCall c;
 
 	USED(a1);
 	USED(a2);
 	USED(a3);
+	USED(trap);
+	runtime·throw("Syscall not supported on Haiku");
+	/*
 	c.fn = (void*)(uintptr) &libc·syscall;
 	c.n = 4;
 	c.args = &trap;
@@ -356,14 +359,18 @@ func Syscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r2 u
 	err = c.err;
 	r1 = c.r1;
 	r2 = c.r2;
+	*/
 }
 
 func RawSyscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r2 uintptr, err uintptr) {
-	LibCall c;
+	//LibCall c;
 
 	USED(a1);
 	USED(a2);
 	USED(a3);
+	USED(trap);
+	runtime·throw("Syscall not supported on Haiku");
+	/*
 	c.fn = (void*)(uintptr) &libc·syscall;
 	c.n = 4;
 	c.args = &trap;
@@ -371,4 +378,5 @@ func RawSyscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r
 	err = c.err;
 	r1 = c.r1;
 	r2 = c.r2;
+	*/
 }

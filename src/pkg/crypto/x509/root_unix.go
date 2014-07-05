@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build dragonfly freebsd haiku linux nacl netbsd openbsd solaris
 
 package x509
 
 import "io/ioutil"
 
 // Possible certificate files; stop after finding one.
+// FIXME: haiku: find, add, maybe use finddir?
 var certFiles = []string{
 	"/etc/ssl/certs/ca-certificates.crt",     // Debian/Ubuntu/Gentoo etc.
 	"/etc/pki/tls/certs/ca-bundle.crt",       // Fedora/RHEL

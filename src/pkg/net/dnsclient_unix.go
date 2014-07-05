@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build darwin dragonfly freebsd haiku linux nacl netbsd openbsd solaris
 
 // DNS client: see RFC 1035.
 // Has to be linked into package net for Dial.
@@ -165,8 +165,14 @@ var cfg struct {
 var onceLoadConfig sync.Once
 
 // Assume dns config file is /etc/resolv.conf here
+// (with a special case for Haiku)
 func loadDefaultConfig() {
-	loadConfig("/etc/resolv.conf", 5*time.Second, nil)
+	resolvConfPath := "/etc/resolv.conf"
+	if runtime.GOOS == "haiku" {
+		//FIXME: haiku: this is wrong; use finddir
+		resolvConfPath = "/boot/system/settings/network/resolv.conf"
+	}
+	loadConfig(resolvConfPath, 5*time.Second, nil)
 }
 
 func loadConfig(resolvConfPath string, reloadTime time.Duration, quit <-chan chan struct{}) {

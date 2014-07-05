@@ -2,13 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build darwin dragonfly freebsd haiku linux nacl netbsd openbsd solaris
 
 // Read system port mappings from /etc/services
 
 package net
 
-import "sync"
+import (
+	"runtime"
+	"sync"
+)
 
 // services contains minimal mappings between services names and port
 // numbers for platforms that don't have a complete list of port numbers
@@ -21,7 +24,11 @@ var onceReadServices sync.Once
 
 func readServices() {
 	var file *file
-	if file, servicesError = open("/etc/services"); servicesError != nil {
+	servicesPath := "/etc/services"
+	if runtime.GOOS == "haiku" {
+		servicesPath = "/boot/system/settings/network/services"
+	}
+	if file, servicesError = open(servicesPath); servicesError != nil {
 		return
 	}
 	for line, ok := file.readLine(); ok; line, ok = file.readLine() {

@@ -154,6 +154,12 @@ freebsd_arm)
 	# API consistent across over platforms.
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs -- -fsigned-char"
 	;;
+haiku_386)
+	mkerrors="$mkerrors -m32"
+	mksyscall="./mksyscall_solaris.pl -modname libroot"
+	mksysnum=
+	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
+	;;
 linux_386)
 	mkerrors="$mkerrors -m32"
 	mksyscall="./mksyscall.pl -l32"

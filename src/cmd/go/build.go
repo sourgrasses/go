@@ -1591,7 +1591,8 @@ func (gcToolchain) gc(b *builder, p *Package, archive, obj string, importArgs []
 			extFiles++
 		}
 	}
-	if extFiles == 0 {
+	// FIXME: haiku: this is an awful workaround since otherwise the syscall package won't compile
+	if extFiles == 0 && runtime.GOOS != "haiku" {
 		gcargs = append(gcargs, "-complete")
 	}
 	if buildContext.InstallSuffix != "" {

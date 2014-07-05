@@ -330,7 +330,7 @@ func anyToSockaddr(rsa *RawSockaddrAny) (Sockaddr, error) {
 	return nil, EAFNOSUPPORT
 }
 
-//sys	accept(s int, rsa *RawSockaddrAny, addrlen *_Socklen) (fd int, err error) = libsocket.accept
+//sys	accept(s int, rsa *RawSockaddrAny, addrlen *_Socklen) (fd int, err error) = libnetwork.accept
 
 func Accept(fd int) (nfd int, sa Sockaddr, err error) {
 	var rsa RawSockaddrAny
@@ -384,7 +384,7 @@ func Sendmsg(fd int, p, oob []byte, to Sockaddr, flags int) (err error) {
 	return
 }
 
-//sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error) = libsocket.sendmsg
+//sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error) = libnetwork.sendmsg
 
 func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) {
 	var ptr unsafe.Pointer
@@ -452,7 +452,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	Kill(pid int, signum Signal) (err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
-//sys	Listen(s int, backlog int) (err error) = libsocket.listen
+//sys	Listen(s int, backlog int) (err error) = libnetwork.listen
 //sys	Lstat(path string, stat *Stat_t) (err error)
 //sys	Mkdir(path string, mode uint32) (err error)
 //sys	Mknod(path string, mode uint32, dev int) (err error)
@@ -476,7 +476,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sysnb	Setrlimit(which int, lim *Rlimit) (err error)
 //sysnb	Setsid() (pid int, err error)
 //sysnb	Setuid(uid int) (err error)
-//sys	Shutdown(s int, how int) (err error) = libsocket.shutdown
+//sys	Shutdown(s int, how int) (err error) = libnetwork.shutdown
 //sys	Stat(path string, stat *Stat_t) (err error)
 //sys	Symlink(path string, link string) (err error)
 //sys	Sync() (err error)
@@ -486,20 +486,20 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	Umask(newmask int) (oldmask int)
 //sys	Unlink(path string) (err error)
 //sys	Utimes(path string, times *[2]Timeval) (err error)
-//sys	bind(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libsocket.bind
-//sys	connect(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libsocket.connect
+//sys	bind(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libnetwork.bind
+//sys	connect(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libnetwork.connect
 //sys	mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)
 //sys	munmap(addr uintptr, length uintptr) (err error)
-//sys	sendto(s int, buf []byte, flags int, to unsafe.Pointer, addrlen _Socklen) (err error) = libsocket.sendto
-//sys	socket(domain int, typ int, proto int) (fd int, err error) = libsocket.socket
-//sysnb	socketpair(domain int, typ int, proto int, fd *[2]int32) (err error) = libsocket.socketpair
+//sys	sendto(s int, buf []byte, flags int, to unsafe.Pointer, addrlen _Socklen) (err error) = libnetwork.sendto
+//sys	socket(domain int, typ int, proto int) (fd int, err error) = libnetwork.socket
+//sysnb	socketpair(domain int, typ int, proto int, fd *[2]int32) (err error) = libnetwork.socketpair
 //sys	write(fd int, p []byte) (n int, err error)
-//sys	getsockopt(s int, level int, name int, val unsafe.Pointer, vallen *_Socklen) (err error) = libsocket.getsockopt
-//sysnb	getpeername(fd int, rsa *RawSockaddrAny, addrlen *_Socklen) (err error) = libsocket.getpeername
-//sys	getsockname(fd int, rsa *RawSockaddrAny, addrlen *_Socklen) (err error) = libsocket.getsockname
-//sys	setsockopt(s int, level int, name int, val unsafe.Pointer, vallen uintptr) (err error) = libsocket.setsockopt
-//sys	recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error) = libsocket.recvfrom
-//sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error) = libsocket.recvmsg
+//sys	getsockopt(s int, level int, name int, val unsafe.Pointer, vallen *_Socklen) (err error) = libnetwork.getsockopt
+//sysnb	getpeername(fd int, rsa *RawSockaddrAny, addrlen *_Socklen) (err error) = libnetwork.getpeername
+//sys	getsockname(fd int, rsa *RawSockaddrAny, addrlen *_Socklen) (err error) = libnetwork.getsockname
+//sys	setsockopt(s int, level int, name int, val unsafe.Pointer, vallen uintptr) (err error) = libnetwork.setsockopt
+//sys	recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error) = libnetwork.recvfrom
+//sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error) = libnetwork.recvmsg
 
 //sys	Fdopendir(fd int) (dir unsafe.Pointer, err error)
 //sys	Readdir_r(dir unsafe.Pointer, entry *Dirent, result **Dirent) (status int)
