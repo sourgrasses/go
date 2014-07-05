@@ -131,7 +131,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		if err1 != 0 {
 			goto childerror
 		}
-	}
+	}*/
 
 	// Chdir
 	if dir != nil {
@@ -141,7 +141,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		}
 	}
 
-	// Pass 1: look for fd[i] < i and move those up above len(fd)
+	/*// Pass 1: look for fd[i] < i and move those up above len(fd)
 	// so that pass 2 won't stomp on an fd it needs later.
 	if pipe < nextfd {
 		_, err1 = fcntl1(uintptr(pipe), F_DUP2FD, uintptr(nextfd))
@@ -220,7 +220,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		uintptr(unsafe.Pointer(&argv[0])),
 		uintptr(unsafe.Pointer(&envv[0])))
 
-/*childerror:*/
+childerror:
 	// send error code on pipe
 	write1(uintptr(pipe), uintptr(unsafe.Pointer(&err1)), unsafe.Sizeof(err1))
 	for {
