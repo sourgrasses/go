@@ -15,6 +15,7 @@ package syscall
 #pragma dynimport libc·dlclose dlclose "libroot.so"
 #pragma dynimport libc·dlopen dlopen "libroot.so"
 #pragma dynimport libc·dlsym dlsym "libroot.so"
+#pragma dynimport libc·dup2 dup2 "libroot.so"
 #pragma dynimport libc·execve execve "libroot.so"
 #pragma dynimport libc·fcntl fcntl "libroot.so"
 #pragma dynimport libc·gethostname gethostname "libroot.so"
@@ -34,6 +35,7 @@ extern uintptr libc·close;
 extern uintptr libc·dlclose;
 extern uintptr libc·dlopen;
 extern uintptr libc·dlsym;
+extern uintptr libc·dup2;
 extern uintptr libc·execve;
 extern uintptr libc·exit;
 extern uintptr libc·fcntl;
@@ -159,6 +161,18 @@ func dlsym(handle uintptr, name *uint8) (proc uintptr, err uintptr) {
 		err = c.err;
 	else
 		err = 0;
+}
+
+#pragma textflag NOSPLIT
+func dup2(fd1 uintptr, fd2 uintptr) (val uintptr, err uintptr) {
+	LibCall c;
+	USED(fd2);
+	c.fn = (void*)(uintptr) &libc·dup2;
+	c.n = 2;
+	c.args = (void*) &fd1;
+	runtime·asmcgocall(runtime·asmsysvicall6, &c);
+	val = c.r1;
+	err = c.err;
 }
 
 #pragma textflag NOSPLIT

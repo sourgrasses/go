@@ -24,6 +24,7 @@ func runtime_AfterFork()
 func chdir(path uintptr) (err Errno)
 func chroot1(path uintptr) (err Errno)
 func close(fd uintptr) (err Errno)
+func dup2(fd1 uintptr, fd2 uintptr) (val uintptr, err Errno)
 func execve(path uintptr, argv uintptr, envp uintptr) (err Errno)
 func exit(code uintptr)
 func fcntl1(fd uintptr, cmd uintptr, arg uintptr) (val uintptr, err Errno)
@@ -55,7 +56,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		r1     uintptr
 		err1   Errno
 		nextfd int
-		//i      int
+		i      int
 	)
 
 	// guard against side effects of shuffling fds below.
@@ -88,7 +89,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 
 	// Fork succeeded, now in child.
 
-	/*// Session ID
+	// Session ID
 	if sys.Setsid {
 		_, err1 = setsid()
 		if err1 != 0 {
@@ -131,7 +132,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		if err1 != 0 {
 			goto childerror
 		}
-	}*/
+	}
 
 	// Chdir
 	if dir != nil {
@@ -141,10 +142,10 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		}
 	}
 
-	/*// Pass 1: look for fd[i] < i and move those up above len(fd)
+	// Pass 1: look for fd[i] < i and move those up above len(fd)
 	// so that pass 2 won't stomp on an fd it needs later.
 	if pipe < nextfd {
-		_, err1 = fcntl1(uintptr(pipe), F_DUP2FD, uintptr(nextfd))
+		_, err1 = dup2(uintptr(pipe), uintptr(nextfd))
 		if err1 != 0 {
 			goto childerror
 		}
@@ -154,7 +155,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 	}
 	for i = 0; i < len(fd); i++ {
 		if fd[i] >= 0 && fd[i] < int(i) {
-			_, err1 = fcntl1(uintptr(fd[i]), F_DUP2FD, uintptr(nextfd))
+			_, err1 = dup2(uintptr(pipe), uintptr(nextfd))
 			if err1 != 0 {
 				goto childerror
 			}
@@ -184,7 +185,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		}
 		// The new fd is created NOT close-on-exec,
 		// which is exactly what we want.
-		_, err1 = fcntl1(uintptr(fd[i]), F_DUP2FD, uintptr(i))
+		_, err1 = dup2(uintptr(fd[i]), uintptr(i))
 		if err1 != 0 {
 			goto childerror
 		}
@@ -198,7 +199,7 @@ func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr
 		close(uintptr(i))
 	}
 
-	// Detach fd 0 from tty
+	/*// Detach fd 0 from tty
 	if sys.Noctty {
 		err1 = ioctl(0, uintptr(TIOCNOTTY), 0)
 		if err1 != 0 {
