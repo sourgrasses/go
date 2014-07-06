@@ -351,7 +351,13 @@ cat _error.out | grep -vf _error.grep | grep -vf _signal.grep
 echo
 echo '// Errors'
 echo 'const ('
-cat _error.out | grep -f _error.grep | sed 's/=\(.*\)/= Errno(\1)/'
+if [ "$(uname)" = "Haiku" ]
+then
+	# FIXME: haiku: 64-bit?
+	cat _error.out | grep -f _error.grep | sed 's/=\(.*\)/= Errno(\1 \& 0xffffffff)/'
+else
+	cat _error.out | grep -f _error.grep | sed 's/=\(.*\)/= Errno(\1)/'
+fi
 echo ')'
 
 echo
@@ -418,6 +424,9 @@ main(void)
 		// lowercase first letter: Bad -> bad, but STREAM -> STREAM.
 		if(A <= buf[0] && buf[0] <= Z && a <= buf[1] && buf[1] <= z)
 			buf[0] += a - A;
+'
+		[ "$uname" = "Haiku" ] && echo 'e = e == 0? e: (e & 0x7fffffff) + 1;' # needs matching change in Errno's error printing function
+		echo -E '
 		printf("\t%d: \"%s\",\n", e, buf);
 	}
 	printf("}\n\n");

@@ -354,10 +354,10 @@ func Recvmsg(fd int, p, oob []byte, flags int) (n, oobn int, recvflags int, from
 	msg.Namelen = uint32(SizeofSockaddrAny)
 	var iov Iovec
 	if len(p) > 0 {
-		iov.Base = (*int8)(unsafe.Pointer(&p[0]))
+		iov.Base = (*byte)(unsafe.Pointer(&p[0]))
 		iov.SetLen(len(p))
 	}
-	var dummy int8
+	var dummy byte
 	if len(oob) > 0 {
 		// receive at least one normal byte
 		if len(p) == 0 {
@@ -400,10 +400,10 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 	msg.Namelen = uint32(salen)
 	var iov Iovec
 	if len(p) > 0 {
-		iov.Base = (*int8)(unsafe.Pointer(&p[0]))
+		iov.Base = (*byte)(unsafe.Pointer(&p[0]))
 		iov.SetLen(len(p))
 	}
-	var dummy int8
+	var dummy byte
 	if len(oob) > 0 {
 		// send at least one normal byte
 		if len(p) == 0 {

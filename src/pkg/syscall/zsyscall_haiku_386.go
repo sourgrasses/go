@@ -6,92 +6,91 @@ package syscall
 import "unsafe"
 
 var (
-	modlibroot = newLazySO("libroot.so")
+	modlibroot    = newLazySO("libroot.so")
 	modlibnetwork = newLazySO("libnetwork.so")
 
-	procgetgroups = modlibroot.NewProc("getgroups")
-	procsetgroups = modlibroot.NewProc("setgroups")
-	procfcntl = modlibroot.NewProc("fcntl")
-	procaccept = modlibnetwork.NewProc("accept")
-	procsendmsg = modlibnetwork.NewProc("sendmsg")
-	procAccess = modlibroot.NewProc("access")
-	procAdjtime = modlibroot.NewProc("adjtime")
-	procChdir = modlibroot.NewProc("chdir")
-	procChmod = modlibroot.NewProc("chmod")
-	procChown = modlibroot.NewProc("chown")
-	procChroot = modlibroot.NewProc("chroot")
-	procClose = modlibroot.NewProc("close")
-	procDup = modlibroot.NewProc("dup")
-	procExit = modlibroot.NewProc("exit")
-	procFchdir = modlibroot.NewProc("fchdir")
-	procFchmod = modlibroot.NewProc("fchmod")
-	procFchown = modlibroot.NewProc("fchown")
-	procFpathconf = modlibroot.NewProc("fpathconf")
-	procFstat = modlibroot.NewProc("fstat")
-	procGetgid = modlibroot.NewProc("getgid")
-	procGetpid = modlibroot.NewProc("getpid")
-	procGeteuid = modlibroot.NewProc("geteuid")
-	procGetegid = modlibroot.NewProc("getegid")
-	procGetppid = modlibroot.NewProc("getppid")
-	procGetpriority = modlibroot.NewProc("getpriority")
-	procGetrlimit = modlibroot.NewProc("getrlimit")
+	procgetgroups    = modlibroot.NewProc("getgroups")
+	procsetgroups    = modlibroot.NewProc("setgroups")
+	procfcntl        = modlibroot.NewProc("fcntl")
+	procaccept       = modlibnetwork.NewProc("accept")
+	procsendmsg      = modlibnetwork.NewProc("sendmsg")
+	procAccess       = modlibroot.NewProc("access")
+	procAdjtime      = modlibroot.NewProc("adjtime")
+	procChdir        = modlibroot.NewProc("chdir")
+	procChmod        = modlibroot.NewProc("chmod")
+	procChown        = modlibroot.NewProc("chown")
+	procChroot       = modlibroot.NewProc("chroot")
+	procClose        = modlibroot.NewProc("close")
+	procDup          = modlibroot.NewProc("dup")
+	procExit         = modlibroot.NewProc("exit")
+	procFchdir       = modlibroot.NewProc("fchdir")
+	procFchmod       = modlibroot.NewProc("fchmod")
+	procFchown       = modlibroot.NewProc("fchown")
+	procFpathconf    = modlibroot.NewProc("fpathconf")
+	procFstat        = modlibroot.NewProc("fstat")
+	procGetgid       = modlibroot.NewProc("getgid")
+	procGetpid       = modlibroot.NewProc("getpid")
+	procGeteuid      = modlibroot.NewProc("geteuid")
+	procGetegid      = modlibroot.NewProc("getegid")
+	procGetppid      = modlibroot.NewProc("getppid")
+	procGetpriority  = modlibroot.NewProc("getpriority")
+	procGetrlimit    = modlibroot.NewProc("getrlimit")
 	procGettimeofday = modlibroot.NewProc("gettimeofday")
-	procGetuid = modlibroot.NewProc("getuid")
-	procKill = modlibroot.NewProc("kill")
-	procLchown = modlibroot.NewProc("lchown")
-	procLink = modlibroot.NewProc("link")
-	proclisten = modlibnetwork.NewProc("listen")
-	procLstat = modlibroot.NewProc("lstat")
-	procMkdir = modlibroot.NewProc("mkdir")
-	procMknod = modlibroot.NewProc("mknod")
-	procNanosleep = modlibroot.NewProc("nanosleep")
-	procOpen = modlibroot.NewProc("open")
-	procPathconf = modlibroot.NewProc("pathconf")
-	procPread = modlibroot.NewProc("pread")
-	procPwrite = modlibroot.NewProc("pwrite")
-	procread = modlibroot.NewProc("read")
-	procReadlink = modlibroot.NewProc("readlink")
-	procRename = modlibroot.NewProc("rename")
-	procRmdir = modlibroot.NewProc("rmdir")
-	proclseek = modlibroot.NewProc("lseek")
-	procSetegid = modlibroot.NewProc("setegid")
-	procSeteuid = modlibroot.NewProc("seteuid")
-	procSetgid = modlibroot.NewProc("setgid")
-	procSetpgid = modlibroot.NewProc("setpgid")
-	procSetpriority = modlibroot.NewProc("setpriority")
-	procSetregid = modlibroot.NewProc("setregid")
-	procSetreuid = modlibroot.NewProc("setreuid")
-	procSetrlimit = modlibroot.NewProc("setrlimit")
-	procSetsid = modlibroot.NewProc("setsid")
-	procSetuid = modlibroot.NewProc("setuid")
-	procshutdown = modlibnetwork.NewProc("shutdown")
-	procStat = modlibroot.NewProc("stat")
-	procSymlink = modlibroot.NewProc("symlink")
-	procSync = modlibroot.NewProc("sync")
-	procTruncate = modlibroot.NewProc("truncate")
-	procFsync = modlibroot.NewProc("fsync")
-	procFtruncate = modlibroot.NewProc("ftruncate")
-	procUmask = modlibroot.NewProc("umask")
-	procUnlink = modlibroot.NewProc("unlink")
-	procUtimes = modlibroot.NewProc("utimes")
-	procbind = modlibnetwork.NewProc("bind")
-	procconnect = modlibnetwork.NewProc("connect")
-	procmunmap = modlibroot.NewProc("munmap")
-	procsendto = modlibnetwork.NewProc("sendto")
-	procsocket = modlibnetwork.NewProc("socket")
-	procsocketpair = modlibnetwork.NewProc("socketpair")
-	procwrite = modlibroot.NewProc("write")
-	procgetsockopt = modlibnetwork.NewProc("getsockopt")
-	procgetpeername = modlibnetwork.NewProc("getpeername")
-	procgetsockname = modlibnetwork.NewProc("getsockname")
-	procsetsockopt = modlibnetwork.NewProc("setsockopt")
-	procrecvfrom = modlibnetwork.NewProc("recvfrom")
-	procrecvmsg = modlibnetwork.NewProc("recvmsg")
-	procFdopendir = modlibroot.NewProc("fdopendir")
-	procReaddir_r = modlibroot.NewProc("readdir_r")
-	procClosedir = modlibroot.NewProc("closedir")
-	procPipe = modlibroot.NewProc("pipe")
-
+	procGetuid       = modlibroot.NewProc("getuid")
+	procKill         = modlibroot.NewProc("kill")
+	procLchown       = modlibroot.NewProc("lchown")
+	procLink         = modlibroot.NewProc("link")
+	proclisten       = modlibnetwork.NewProc("listen")
+	procLstat        = modlibroot.NewProc("lstat")
+	procMkdir        = modlibroot.NewProc("mkdir")
+	procMknod        = modlibroot.NewProc("mknod")
+	procNanosleep    = modlibroot.NewProc("nanosleep")
+	procOpen         = modlibroot.NewProc("open")
+	procPathconf     = modlibroot.NewProc("pathconf")
+	procPread        = modlibroot.NewProc("pread")
+	procPwrite       = modlibroot.NewProc("pwrite")
+	procread         = modlibroot.NewProc("read")
+	procReadlink     = modlibroot.NewProc("readlink")
+	procRename       = modlibroot.NewProc("rename")
+	procRmdir        = modlibroot.NewProc("rmdir")
+	proclseek        = modlibroot.NewProc("lseek")
+	procSetegid      = modlibroot.NewProc("setegid")
+	procSeteuid      = modlibroot.NewProc("seteuid")
+	procSetgid       = modlibroot.NewProc("setgid")
+	procSetpgid      = modlibroot.NewProc("setpgid")
+	procSetpriority  = modlibroot.NewProc("setpriority")
+	procSetregid     = modlibroot.NewProc("setregid")
+	procSetreuid     = modlibroot.NewProc("setreuid")
+	procSetrlimit    = modlibroot.NewProc("setrlimit")
+	procSetsid       = modlibroot.NewProc("setsid")
+	procSetuid       = modlibroot.NewProc("setuid")
+	procshutdown     = modlibnetwork.NewProc("shutdown")
+	procStat         = modlibroot.NewProc("stat")
+	procSymlink      = modlibroot.NewProc("symlink")
+	procSync         = modlibroot.NewProc("sync")
+	procTruncate     = modlibroot.NewProc("truncate")
+	procFsync        = modlibroot.NewProc("fsync")
+	procFtruncate    = modlibroot.NewProc("ftruncate")
+	procUmask        = modlibroot.NewProc("umask")
+	procUnlink       = modlibroot.NewProc("unlink")
+	procUtimes       = modlibroot.NewProc("utimes")
+	procbind         = modlibnetwork.NewProc("bind")
+	procconnect      = modlibnetwork.NewProc("connect")
+	procmunmap       = modlibroot.NewProc("munmap")
+	procsendto       = modlibnetwork.NewProc("sendto")
+	procsocket       = modlibnetwork.NewProc("socket")
+	procsocketpair   = modlibnetwork.NewProc("socketpair")
+	procwrite        = modlibroot.NewProc("write")
+	procgetsockopt   = modlibnetwork.NewProc("getsockopt")
+	procgetpeername  = modlibnetwork.NewProc("getpeername")
+	procgetsockname  = modlibnetwork.NewProc("getsockname")
+	procsetsockopt   = modlibnetwork.NewProc("setsockopt")
+	procrecvfrom     = modlibnetwork.NewProc("recvfrom")
+	procrecvmsg      = modlibnetwork.NewProc("recvmsg")
+	procFdopendir    = modlibroot.NewProc("fdopendir")
+	procReaddir_r    = modlibroot.NewProc("readdir_r")
+	procClosedir     = modlibroot.NewProc("closedir")
+	procPipe         = modlibroot.NewProc("pipe")
 )
 
 func getgroups(ngid int, gid *_Gid_t) (n int, err error) {
@@ -462,7 +461,7 @@ func Pread(fd int, p []byte, offset int64) (n int, err error) {
 	if len(p) > 0 {
 		_p0 = &p[0]
 	}
-	r0, _, e1 := sysvicall6(procPread.Addr(), 5, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(p)), uintptr(offset), uintptr(offset >> 32), 0)
+	r0, _, e1 := sysvicall6(procPread.Addr(), 5, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(p)), uintptr(offset), uintptr(offset>>32), 0)
 	n = int(r0)
 	if e1 != 0 {
 		err = e1
@@ -475,7 +474,7 @@ func Pwrite(fd int, p []byte, offset int64) (n int, err error) {
 	if len(p) > 0 {
 		_p0 = &p[0]
 	}
-	r0, _, e1 := sysvicall6(procPwrite.Addr(), 5, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(p)), uintptr(offset), uintptr(offset >> 32), 0)
+	r0, _, e1 := sysvicall6(procPwrite.Addr(), 5, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(p)), uintptr(offset), uintptr(offset>>32), 0)
 	n = int(r0)
 	if e1 != 0 {
 		err = e1
@@ -546,7 +545,7 @@ func Rmdir(path string) (err error) {
 }
 
 func Seek(fd int, offset int64, whence int) (newoffset int64, err error) {
-	r0, r1, e1 := sysvicall6(proclseek.Addr(), 4, uintptr(fd), uintptr(offset), uintptr(offset >> 32), uintptr(whence), 0, 0)
+	r0, r1, e1 := sysvicall6(proclseek.Addr(), 4, uintptr(fd), uintptr(offset), uintptr(offset>>32), uintptr(whence), 0, 0)
 	newoffset = int64(int64(r1)<<32 | int64(r0))
 	if e1 != 0 {
 		err = e1
@@ -688,7 +687,7 @@ func Truncate(path string, length int64) (err error) {
 	if err != nil {
 		return
 	}
-	_, _, e1 := sysvicall6(procTruncate.Addr(), 3, uintptr(unsafe.Pointer(_p0)), uintptr(length), uintptr(length >> 32), 0, 0, 0)
+	_, _, e1 := sysvicall6(procTruncate.Addr(), 3, uintptr(unsafe.Pointer(_p0)), uintptr(length), uintptr(length>>32), 0, 0, 0)
 	if e1 != 0 {
 		err = e1
 	}
@@ -704,7 +703,7 @@ func Fsync(fd int) (err error) {
 }
 
 func Ftruncate(fd int, length int64) (err error) {
-	_, _, e1 := sysvicall6(procFtruncate.Addr(), 3, uintptr(fd), uintptr(length), uintptr(length >> 32), 0, 0, 0)
+	_, _, e1 := sysvicall6(procFtruncate.Addr(), 3, uintptr(fd), uintptr(length), uintptr(length>>32), 0, 0, 0)
 	if e1 != 0 {
 		err = e1
 	}
@@ -898,5 +897,3 @@ func Pipe(fds []int) (err error) {
 	}
 	return
 }
-
-
