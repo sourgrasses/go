@@ -156,7 +156,7 @@ freebsd_arm)
 	;;
 haiku_386)
 	mkerrors="$mkerrors -m32"
-	mksyscall="./mksyscall_solaris.pl -modname libroot"
+	mksyscall="./mksyscall_solaris.pl -l32 -modname libroot"
 	mksysnum=
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;

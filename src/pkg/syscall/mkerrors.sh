@@ -84,6 +84,21 @@ includes_FreeBSD='
 #endif
 '
 
+includes_Haiku='
+#include <sys/types.h>
+#include <sys/file.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip6.h>
+#include <netinet/tcp.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/resource.h>
+'
+
 includes_Linux='
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
@@ -219,6 +234,8 @@ includes='
 '
 
 ccflags="$@"
+
+[ "$(uname)" = "Haiku" ] && includes=
 
 # Write go tool cgo -godefs input.
 (
@@ -404,7 +421,7 @@ main(void)
 		printf("\t%d: \"%s\",\n", e, buf);
 	}
 	printf("}\n\n");
-	
+
 	printf("\n\n// Signal table\n");
 	printf("var signals = [...]string {\n");
 	qsort(signals, nelem(signals), sizeof signals[0], intcmp);

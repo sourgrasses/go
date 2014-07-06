@@ -20,6 +20,7 @@ package syscall
 #pragma dynimport libc·fcntl fcntl "libroot.so"
 #pragma dynimport libc·gethostname gethostname "libroot.so"
 #pragma dynimport libc·ioctl ioctl "libroot.so"
+#pragma dynimport libc·mmap mmap "libroot.so"
 #pragma dynimport libc·pipe pipe "libroot.so"
 #pragma dynimport libc·setgid setgid "libroot.so"
 #pragma dynimport libc·setgroups setgroups "libroot.so"
@@ -41,6 +42,7 @@ extern uintptr libc·exit;
 extern uintptr libc·fcntl;
 extern uintptr libc·gethostname;
 extern uintptr libc·ioctl;
+extern uintptr libc·mmap;
 extern uintptr libc·pipe;
 extern uintptr libc·setgid;
 extern uintptr libc·setgroups;
@@ -355,6 +357,22 @@ func write1(fd uintptr, buf uintptr, nbyte uintptr) (n uintptr, err uintptr) {
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
 	err = c.err;
 	n = c.r1;
+}
+
+// FIXME: haiku: can we fix the auto generator so we won't have to handcode this?
+func mmap(addr uintptr, length uintptr, prot uintptr, flag uintptr, fd uintptr, pos int64) (ret uintptr, err uintptr) {
+	LibCall c;
+	USED(length);
+	USED(prot);
+	USED(flag);
+	USED(fd);
+	USED(pos);
+	c.fn = (void*)(uintptr) &libc·mmap;
+	c.n = 7;
+	c.args = &addr;
+	runtime·cgocall(runtime·asmsysvicall6, &c);
+	err = c.err;
+	ret = c.r1;
 }
 
 func Syscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r2 uintptr, err uintptr) {

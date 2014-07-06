@@ -423,6 +423,9 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 	return n, nil
 }
 
+// FIXME: haiku: fix the auto generator so that it can deal with more than 6 params
+func mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)
+
 /*
  * Exposed directly
  */
@@ -488,7 +491,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	Utimes(path string, times *[2]Timeval) (err error)
 //sys	bind(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libnetwork.bind
 //sys	connect(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libnetwork.connect
-//sys	mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)
+/*//sys	mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)*/
 //sys	munmap(addr uintptr, length uintptr) (err error)
 //sys	sendto(s int, buf []byte, flags int, to unsafe.Pointer, addrlen _Socklen) (err error) = libnetwork.sendto
 //sys	socket(domain int, typ int, proto int) (fd int, err error) = libnetwork.socket
