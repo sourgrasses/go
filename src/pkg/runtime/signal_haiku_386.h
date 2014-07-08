@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#define SIG_REGS(ctxt) (*((Sigcontext*)&((Ucontext*)(ctxt))->uc_mcontext))
+#define SIG_REGS(ctxt) (((Ucontext*)(ctxt))->uc_mcontext)
 
 #define SIG_EAX(info, ctxt) (SIG_REGS(ctxt).eax)
 #define SIG_EBX(info, ctxt) (SIG_REGS(ctxt).ebx)
@@ -15,10 +15,10 @@
 #define SIG_EIP(info, ctxt) (SIG_REGS(ctxt).eip)
 #define SIG_EFLAGS(info, ctxt) (SIG_REGS(ctxt).eflags)
 
-#define SIG_CS(info, ctxt) (SIG_REGS(ctxt).cs)
-#define SIG_FS(info, ctxt) (SIG_REGS(ctxt).fs)
-#define SIG_GS(info, ctxt) (SIG_REGS(ctxt).gs)
+// FIXME: haiku: segment registers
+#define SIG_CS(info, ctxt) (-1)
+#define SIG_FS(info, ctxt) (-1)
+#define SIG_GS(info, ctxt) (-1)
 
 #define SIG_CODE0(info, ctxt) ((info)->si_code)
-#define SIG_CODE1(info, ctxt) (((uintptr*)(info))[2])
-
+#define SIG_CODE1(info, ctxt) ((uintptr)(info)->si_addr)

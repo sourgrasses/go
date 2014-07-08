@@ -19,16 +19,6 @@ void runtime·setitimer(int32, Itimerval*, Itimerval*);
 #define	NSIG	65
 #define	SI_USER 0
 
-// It's hard to tease out exactly how big a Sigset is, but
-// rt_sigprocmask crashes if we get it wrong, so if binaries
-// are running, this is right.
-// zhuowei - signal.h in Haiku declares it as a uint64,
-// so this matches linux behaviour
-typedef struct Sigset Sigset;
-struct Sigset
-{
-	uint32 mask[2];
-};
 void	runtime·rtsigprocmask(int32, Sigset*, Sigset*, int32);
 void	runtime·unblocksignals(void);
 #define SIG_SETMASK 3

@@ -216,13 +216,13 @@ func fcntl1(fd uintptr, cmd uintptr, arg uintptr) (val uintptr, err uintptr) {
 
 func gethostname() (name String, err uintptr) {
 	struct { uintptr v[2]; } args;
-	uint8 cname[MAXHOSTNAMELEN];
+	uint8 cname[HOST_NAME_MAX];
 	LibCall c;
 
 	c.fn = (void*)(uintptr) &libc·gethostname;
 	c.n = 2;
 	args.v[0] = (uintptr)&cname[0];
-	args.v[1] = MAXHOSTNAMELEN;
+	args.v[1] = HOST_NAME_MAX;
 	c.args = (void*)&args;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
 	err = c.err;
@@ -230,7 +230,7 @@ func gethostname() (name String, err uintptr) {
 		name = runtime·emptystring;
 		return;
 	}
-	cname[MAXHOSTNAMELEN - 1] = 0;
+	cname[HOST_NAME_MAX - 1] = 0;
 	name = runtime·gostring(cname);
 }
 
