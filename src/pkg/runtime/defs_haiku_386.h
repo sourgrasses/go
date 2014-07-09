@@ -84,6 +84,7 @@ enum {
 typedef struct SemT SemT;
 typedef struct StackT StackT;
 typedef struct Siginfo Siginfo;
+typedef struct Sigaction Sigaction;
 typedef struct ExtendedRegs ExtendedRegs;
 typedef struct Mcontext Mcontext;
 typedef struct Ucontext Ucontext;
@@ -117,6 +118,12 @@ struct Siginfo {
 	int32	si_status;
 	int32	si_band;
 	byte	si_value[4];
+};
+struct Sigaction {
+	byte	anon0[4];
+	uint64	sa_mask;
+	int32	sa_flags;
+	byte	*sa_userdata;
 };
 
 struct ExtendedRegs {

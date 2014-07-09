@@ -9,7 +9,7 @@
 //int32	runtime·clone(int32, void*, M*, G*, void(*)(void));
 
 struct Sigaction;
-int32	runtime·rt_sigaction(uintptr, struct Sigaction*, void*, uintptr);
+void	runtime·sigaction(int32, struct Sigaction*, struct Sigaction*);
 
 void	runtime·sigaltstack(Sigaltstack*, Sigaltstack*);
 void	runtime·sigpanic(void);
@@ -19,7 +19,7 @@ void runtime·setitimer(int32, Itimerval*, Itimerval*);
 #define	NSIG	65
 #define	SI_USER 0
 
-void	runtime·rtsigprocmask(int32, Sigset*, Sigset*, int32);
+void	runtime·sigprocmask(int32, Sigset*, Sigset*);
 void	runtime·unblocksignals(void);
 #define SIG_SETMASK 3
 

@@ -97,8 +97,8 @@ int32	runtime·sem_wait(SemT* sem);
 int64	runtime·sysconf(int32 name);
 
 extern SigTab runtime·sigtab[];
-/*static Sigset sigset_none;*/
-/*static Sigset sigset_all = { ~(uint32)0, ~(uint32)0, ~(uint32)0, ~(uint32)0, };*/
+static Sigset sigset_none;
+static Sigset sigset_all = ~(uint64)0;
 
 // Calling sysvcall on os stack.
 #pragma textflag NOSPLIT
@@ -154,11 +154,11 @@ runtime·newosproc(M *mp, void *stk)
 
 	// Disable signals during create, so that the new thread starts
 	// with signals disabled.  It will enable them in minit.
-	//runtime·sigprocmask(SIG_SETMASK, &sigset_all, &oset);
+	runtime·sigprocmask(SIG_SETMASK, &sigset_all, &oset);
 	mp->g0->stackbase = 0xdeadf00d;
 	mp->g0->stacksize = 0xdead;
 	ret = runtime·pthread_create(&tid, &attr, (void (*)(void))runtime·tstart_sysvicall, mp);
-	//runtime·sigprocmask(SIG_SETMASK, &oset, nil);
+	runtime·sigprocmask(SIG_SETMASK, &oset, nil);
 	if(ret != 0) {
 		runtime·printf("runtime: failed to create new OS thread (have %d already; errno=%d)\n", runtime·mcount(), ret);
 		runtime·throw("runtime.newosproc");
@@ -203,7 +203,7 @@ runtime·minit(void)
 	runtime·asmcgocall(runtime·miniterrno, (void *) &libc·_errnop);
 	// Initialize signal handling
 	runtime·signalstack((byte*)m->gsignal->stackguard - StackGuard, 32*1024);
-	//runtime·sigprocmask(SIG_SETMASK, &sigset_none, nil);
+	runtime·sigprocmask(SIG_SETMASK, &sigset_none, nil);
 }
 
 // Called from dropm to undo the effect of an minit.
@@ -216,7 +216,7 @@ runtime·unminit(void)
 void
 runtime·sigpanic(void)
 {
-	/*if(!runtime·canpanic(g))
+	if(!runtime·canpanic(g))
 		runtime·throw("unexpected signal during runtime execution");
 
 	switch(g->sig) {
@@ -246,7 +246,6 @@ runtime·sigpanic(void)
 		runtime·panicstring("floating point error");
 	}
 	runtime·panicstring(runtime·sigtab[g->sig].name);
-	*/
 }
 
 uintptr
@@ -296,13 +295,10 @@ runtime·setsig(int32 i, GoSighandler *fn, bool restart)
 	sa.sa_flags = SA_SIGINFO|SA_ONSTACK;
 	if(restart)
 		sa.sa_flags |= SA_RESTART;
-	sa.sa_mask.__sigbits[0] = ~(uint32)0;
-	sa.sa_mask.__sigbits[1] = ~(uint32)0;
-	sa.sa_mask.__sigbits[2] = ~(uint32)0;
-	sa.sa_mask.__sigbits[3] = ~(uint32)0;
+	sa.sa_mask = ~(uint64)0;
 	if(fn == runtime·sighandler)
 		fn = (void*)runtime·sigtramp;
-	*((void**)&sa._funcptr[0]) = (void*)fn;
+	*((void**)&sa.anon0[0]) = (void*)fn;
 	runtime·sigaction(i, &sa, nil);
 	*/
 }
@@ -314,9 +310,9 @@ runtime·getsig(int32 i)
 
 	runtime·memclr((byte*)&sa, sizeof sa);
 	runtime·sigaction(i, nil, &sa);
-	if(*((void**)&sa._funcptr[0]) == runtime·sigtramp)
+	if(*((void**)&sa.anon0[0]) == runtime·sigtramp)
 		return runtime·sighandler;
-	return *((void**)&sa._funcptr[0]);
+	return *((void**)&sa.anon0[0]);
 	*/
 	return (void*) 0x1c1c1e;
 }
@@ -324,7 +320,7 @@ runtime·getsig(int32 i)
 void
 runtime·signalstack(byte *p, int32 n)
 {
-	/*StackT st;
+	StackT st;
 
 	st.ss_sp = (void*)p;
 	st.ss_size = n;
@@ -332,13 +328,12 @@ runtime·signalstack(byte *p, int32 n)
 	if(p == nil)
 		st.ss_flags = SS_DISABLE;
 	runtime·sigaltstack(&st, nil);
-	*/
 }
 
 void
 runtime·unblocksignals(void)
 {
-	//runtime·sigprocmask(SIG_SETMASK, &sigset_none, nil);
+	runtime·sigprocmask(SIG_SETMASK, &sigset_none, nil);
 }
 
 #pragma textflag NOSPLIT
@@ -397,8 +392,8 @@ runtime·semasleep(int64 ns)
 		runtime·asmcgocall(runtime·asmsysvicall6, &m->libcall);
 		if(m->libcall.r1 == 0)
 			break;
-		//if(*m->perrno == EINTR)
-		//	continue;
+		if(*m->perrno == EINTR)
+			continue;
 		runtime·throw("sem_wait");
 	}
 	return 0;

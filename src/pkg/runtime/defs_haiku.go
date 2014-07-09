@@ -113,6 +113,7 @@ type StackT C.stack_t
 type Sigaltstack StackT
 
 type Siginfo C.siginfo_t
+type Sigaction C.struct_sigaction
 
 // needed by Mcontext
 type ExtendedRegs C.struct_extended_regs
