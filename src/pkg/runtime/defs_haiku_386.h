@@ -3,10 +3,11 @@
 
 
 enum {
-	EINTR	= -0x7ffffff6,
-	EFAULT	= -0x7fffecff,
-	EAGAIN	= -0x7ffffff5,
-	ENOMEM	= -0x80000000,
+	EINTR		= -0x7ffffff6,
+	EFAULT		= -0x7fffecff,
+	EAGAIN		= -0x7ffffff5,
+	ENOMEM		= -0x80000000,
+	ETIMEDOUT	= -0x7ffffff7,
 
 	PROT_NONE	= 0x0,
 	PROT_READ	= 0x1,
@@ -79,6 +80,8 @@ enum {
 	F_GETFL		= 0x8,
 	F_SETFL		= 0x10,
 	F_SETFD		= 0x4,
+
+	_SC_NPROCESSORS_ONLN	= 0x23,
 };
 
 typedef struct SemT SemT;

@@ -349,7 +349,7 @@ MSpan*
 runtime·MHeap_Lookup(MHeap *h, void *v)
 {
 	uintptr p;
-	
+
 	p = (uintptr)v;
 	p -= (uintptr)h->arena_start;
 	return h->spans[p >> PageShift];
@@ -482,7 +482,7 @@ scavenge(int32 k, uint64 now, uint64 limit)
 	uint32 i;
 	uintptr sumreleased;
 	MHeap *h;
-	
+
 	h = &runtime·mheap;
 	sumreleased = 0;
 	for(i=0; i < nelem(h->free); i++)
@@ -506,8 +506,6 @@ static FuncVal forcegchelperv = {(void(*)(void))forcegchelper};
 void
 runtime·MHeap_Scavenger(void)
 {
-	/*
-	FIXME: Garbage collection disabled
 	MHeap *h;
 	uint64 tick, now, forcegc, limit;
 	int64 unixnow;
@@ -551,7 +549,7 @@ runtime·MHeap_Scavenger(void)
 		now = runtime·nanotime();
 		scavenge(k, now, limit);
 		runtime·unlock(h);
-	}*/
+	}
 }
 
 void

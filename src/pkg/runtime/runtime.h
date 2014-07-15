@@ -374,9 +374,10 @@ struct	M
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
 	LibCall	libcall;
+	// FIXME: haiku: what about 64-bit timespecs on amd64?
 	struct {
-		int64	tv_sec;
-		int64	tv_nsec;
+		int32	tv_sec;
+		int32	tv_nsec;
 	} ts;
 	struct {
 		uintptr v[6];
@@ -469,7 +470,7 @@ struct	Func
 {
 	uintptr	entry;	// start pc
 	int32	nameoff;// function name
-	
+
 	int32	args;	// in/out args size
 	int32	frame;	// legacy frame size; use pcsp if possible
 
@@ -825,7 +826,7 @@ int32	runtime·charntorune(int32*, uint8*, int32);
  * which parts of the argument list are inputs vs outputs.
  *
  * Therefore, do NOT use this macro if at all possible.
- */ 
+ */
 #define FLUSH(x)	USED(x)
 
 /*
@@ -1078,7 +1079,7 @@ void	runtime·parforiters(ParFor*, uintptr, uintptr*, uintptr*);
 /*
  * low level C-called
  */
-// for mmap, we only pass the lower 32 bits of file offset to the 
+// for mmap, we only pass the lower 32 bits of file offset to the
 // assembly routine; the higher bits (if required), should be provided
 // by the assembly routine as 0.
 uint8*	runtime·mmap(byte*, uintptr, int32, int32, int32, uint32);

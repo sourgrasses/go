@@ -224,3 +224,25 @@ sigtramp_ret:
 	MOVL	80(SP), BP
 	MOVL	84(SP), SI
 	RET
+
+// Sorta-inspired by the Solaris port, but we need to pass
+// back the two params in ax and bx (r1, r2)
+//
+// clock_gettime(3c) wrapper because Timespec is too large for
+// runtime·nanotime stack.
+//
+// Called using runtime·sysvicall6 from os_solaris.c:/nanotime.
+TEXT runtime·nanotime1(SB),NOSPLIT,$0
+	// need space for the timespec argument.
+	SUBL	$64, SP	// 16 bytes will do, but who knows in the future?
+	MOVL	SP, AX
+	PUSHL	AX
+	PUSHL	$0xffffffff // -1 = CLOCK_REALTIME
+	MOVL	$libc·clock_gettime(SB), AX
+	CALL	AX
+	POPL	AX
+	POPL	AX
+	MOVL	(SP), AX	// tv_sec from struct timespec
+	MOVL 	4(SP), BX // tv_nsec
+	ADDL	$64, SP
+	RET

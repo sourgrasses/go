@@ -36,7 +36,7 @@
 #pragma dynimport libc·sched_yield sched_yield "libroot.so"
 #pragma dynimport libc·sem_init sem_init "libroot.so"
 #pragma dynimport libc·sem_post sem_post "libroot.so"
-#pragma dynimport libc·sem_reltimedwait_np sem_reltimedwait_np "libroot.so"
+#pragma dynimport libc·sem_timedwait sem_timedwait "libroot.so"
 #pragma dynimport libc·sem_wait sem_wait "libroot.so"
 #pragma dynimport libc·setitimer setitimer "libroot.so"
 #pragma dynimport libc·sigaction sigaction "libroot.so"
@@ -70,7 +70,7 @@ extern uintptr libc·sched_yield;
 extern uintptr libc·select;
 extern uintptr libc·sem_init;
 extern uintptr libc·sem_post;
-extern uintptr libc·sem_reltimedwait_np;
+extern uintptr libc·sem_timedwait;
 extern uintptr libc·sem_wait;
 extern uintptr libc·setitimer;
 extern uintptr libc·sigaction;
@@ -92,7 +92,7 @@ int32	runtime·pthread_create(Pthread* thread, PthreadAttr* attr, void(*fn)(void
 uint32	runtime·tstart_sysvicall(M *newm);
 int32	runtime·sem_init(SemT* sem, int32 pshared, uint32 value);
 int32	runtime·sem_post(SemT* sem);
-int32	runtime·sem_reltimedwait_np(SemT* sem, Timespec* timeout);
+//int32	runtime·sem_reltimedwait(SemT* sem, Timespec* timeout);
 int32	runtime·sem_wait(SemT* sem);
 int64	runtime·sysconf(int32 name);
 
@@ -118,14 +118,12 @@ runtime·sysvicall6(uintptr fn, int32 count, ...)
 static int32
 getncpu(void)
 {
-/*	int32 n;
+	int32 n;
 
 	n = (int32)runtime·sysconf(_SC_NPROCESSORS_ONLN);
 	if(n < 1)
 		return 1;
 	return n;
-*/
-	return 1;
 }
 
 void
@@ -357,16 +355,18 @@ runtime·semacreate(void)
 	return (uintptr)sem;
 }
 
+int32   _div64by32(int64 numerator, int32 denominator, int32* pointerToRemainder);
+
 #pragma textflag NOSPLIT
 int32
 runtime·semasleep(int64 ns)
 {
 	if(ns >= 0) {
-		/*
-		m->ts.tv_sec = ns / 1000000000LL;
-		m->ts.tv_nsec = ns % 1000000000LL;
+		ns += runtime·nanotime();
+		// because 64-bit divide generates a call to a split stack method, which we can't call
+		m->ts.tv_sec = _div64by32(ns, 1000000000, &(m->ts.tv_nsec));
 
-		m->libcall.fn = (void*)(uintptr) &libc·sem_reltimedwait_np;
+		m->libcall.fn = (void*)(uintptr) &libc·sem_timedwait;
 		m->libcall.n = 2;
 		runtime·memclr((byte*)&m->scratch, sizeof(m->scratch));
 		m->scratch.v[0] = m->waitsema;
@@ -376,12 +376,9 @@ runtime·semasleep(int64 ns)
 		if(*m->perrno != 0) {
 			if(*m->perrno == ETIMEDOUT || *m->perrno == EAGAIN || *m->perrno == EINTR)
 				return -1;
-			runtime·throw("sem_reltimedwait_np");
+			runtime·throw("sem_reltimedwait");
 		}
 		return 0;
-		*/
-		runtime·throw("Todo: implement semasleep");
-		return -1;
 	}
 	for(;;) {
 		m->libcall.fn = (void*)(uintptr) &libc·sem_wait;
@@ -444,12 +441,13 @@ runtime·munmap(byte* addr, uintptr len)
 	runtime·sysvicall6((uintptr) &libc·munmap, 2, (uintptr)addr, (uintptr)len);
 }
 
-//extern int64 runtime·nanotime1(void);
+extern void runtime·nanotime1(void);
 #pragma textflag NOSPLIT
 int64
 runtime·nanotime(void)
 {
-	return 0;//runtime·sysvicall6((uintptr)runtime·nanotime1, 0);
+	runtime·sysvicall6((uintptr)runtime·nanotime1, 0);
+	return (m->libcall.r1 * 1000000000LL) + m->libcall.r2;
 }
 
 void
@@ -534,12 +532,14 @@ runtime·sem_post(SemT* sem)
 	return runtime·sysvicall6((uintptr) &libc·sem_post, 1, (uintptr)sem);
 }
 
+/*
 #pragma textflag NOSPLIT
 int32
 runtime·sem_reltimedwait_np(SemT* sem, Timespec* timeout)
 {
 	return runtime·sysvicall6((uintptr) &libc·sem_reltimedwait_np, 2, (uintptr)sem, (uintptr)timeout);
 }
+*/
 
 #pragma textflag NOSPLIT
 int32
