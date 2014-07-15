@@ -204,7 +204,8 @@ loadlib(void)
 		// The startup code uses an import of runtime/cgo to decide
 		// whether to initialize the TLS.  So give it one.  This could
 		// be handled differently but it's an unusual case.
-		loadinternal("runtime/cgo");
+		if (HEADTYPE != Hhaiku) // FIXME: haiku: kludge to avoid printing a warning
+			loadinternal("runtime/cgo");
 		if(i < ctxt->libraryp)
 			objfile(ctxt->library[i].file, ctxt->library[i].pkg);
 
