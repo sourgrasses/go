@@ -16,6 +16,7 @@ var certFiles = []string{
 	"/etc/ssl/ca-bundle.pem",                 // OpenSUSE
 	"/etc/ssl/cert.pem",                      // OpenBSD
 	"/usr/local/share/certs/ca-root-nss.crt", // FreeBSD/DragonFly
+	"/system/data/ssl/CARootCertificates.pem",// Haiku FIXME haiku
 }
 
 func (c *Certificate) systemVerify(opts *VerifyOptions) (chains [][]*Certificate, err error) {
