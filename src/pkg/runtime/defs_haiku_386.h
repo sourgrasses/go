@@ -8,6 +8,7 @@ enum {
 	EAGAIN		= -0x7ffffff5,
 	ENOMEM		= -0x80000000,
 	ETIMEDOUT	= -0x7ffffff7,
+	EACCES		= -0x7ffffffe,
 
 	PROT_NONE	= 0x0,
 	PROT_READ	= 0x1,
@@ -82,6 +83,10 @@ enum {
 	F_SETFD		= 0x4,
 
 	_SC_NPROCESSORS_ONLN	= 0x23,
+
+	B_PAGE_SIZE	= 0x1000,
+
+	B_ERROR	= -0x1,
 };
 
 typedef struct SemT SemT;

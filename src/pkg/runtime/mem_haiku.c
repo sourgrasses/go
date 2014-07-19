@@ -8,42 +8,25 @@
 #include "os_GOOS.h"
 #include "malloc.h"
 
-enum
-{
-	_PAGE_SIZE = 4096,
-	EACCES = 13,
-};
-
-/*enum
-{
-	EAGAIN = -2147483637,
-	ENOMEM = -2147483648,
-};*/
+uintptr runtime·area_for(void* addr);
 
 static int32
 addrspace_free(void *v, uintptr n)
 {
-	/*int32 errval;
+	uintptr errval;
 	uintptr chunk;
 	uintptr off;
 
-	// NOTE: vec must be just 1 byte long here.
-	// Mincore returns ENOMEM if any of the pages are unmapped,
-	// but we want to know that all of the pages are unmapped.
-	// To make these the same, we can only ask about one page
-	// at a time. See golang.org/issue/7476.
-	static byte vec[1];
-
 	for(off = 0; off < n; off += chunk) {
-		chunk = _PAGE_SIZE * sizeof vec;
+		chunk = B_PAGE_SIZE;
 		if(chunk > (n - off))
 			chunk = n - off;
-		errval = runtime·mincore((int8*)v + off, chunk, vec);
-		// ENOMEM means unmapped, which is what we want.
+		errval = runtime·area_for((void*)((uintptr) v + off));
+		// B_ERROR means unmapped, which is what we want.
 		// Anything else we assume means the pages are mapped.
-		if (errval != -ENOMEM)
+		if (errval != B_ERROR)
 			return 0;
-	}*/
+	}
 	return 1;
 }
 
@@ -134,17 +117,17 @@ runtime·SysReserve(void *v, uintptr n, bool *reserved)
 		return v;
 	}
 
-	int32 status = runtime·kern_reserve_address_range(&p, 0x7 /* B_EXACT_ADDRESS */, 64<<10);
-	//p = runtime·mmap(v, n, PROT_NONE, MAP_ANON|MAP_PRIVATE, -1, 0);
+	//int32 status = runtime·kern_reserve_address_range(&p, 0x7 /* B_RANDOMIZED_BASE_ADDRESS */, 64<<10);
+	*reserved = false;
+	p = runtime·mmap(v, n, PROT_NONE, MAP_ANON|MAP_PRIVATE, -1, 0);
 	//that doesn't work: PROT_NONE still reserves physical memory
-	//so kludge around it until I can figure out what is happening
-	//in this case, reserve 64 KB of memory, because logic.
-	//if((uintptr)p < 4096)
-	//	return nil;
-	if (status) {
+	//so immediately unmap it and mark it as unreserved
+	if((uintptr)p < 4096)
 		return nil;
-	}
-	*reserved = true;
+	//if (status) {
+	//	return nil;
+	//}
+	runtime·munmap(p, n);
 	return p;
 }
 

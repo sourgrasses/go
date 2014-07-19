@@ -22,6 +22,8 @@ package runtime
 #include <sys/mman.h>
 #include <semaphore.h>
 #include <pthread.h>
+
+#include <kernel/OS.h>
 */
 import "C"
 
@@ -31,6 +33,7 @@ const (
 	EAGAIN = C.EAGAIN
 	ENOMEM = C.ENOMEM
 	ETIMEDOUT = C.ETIMEDOUT
+	EACCES = C.EACCES
 
 	PROT_NONE  = C.PROT_NONE
 	PROT_READ  = C.PROT_READ
@@ -105,6 +108,10 @@ const (
 	F_SETFD    = C.F_SETFD
 
 	_SC_NPROCESSORS_ONLN = C._SC_NPROCESSORS_ONLN
+
+	B_PAGE_SIZE = C.B_PAGE_SIZE
+
+	B_ERROR = C.B_ERROR
 
 )
 

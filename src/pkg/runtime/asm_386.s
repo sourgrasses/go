@@ -777,7 +777,6 @@ TEXT setmg_gcc<>(SB), NOSPLIT, $0
 
 // check that SP is in range [g->stackbase, g->stackguard)
 TEXT runtime·stackcheck(SB), NOSPLIT, $0-0
-	RET //FIXME: properly set up stack check
 	get_tls(CX)
 	MOVL	g(CX), AX
 	CMPL	g_stackbase(AX), SP
