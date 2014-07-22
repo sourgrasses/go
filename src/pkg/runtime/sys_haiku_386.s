@@ -243,6 +243,6 @@ TEXT runtime·nanotime1(SB),NOSPLIT,$0
 	POPL	AX
 	POPL	AX
 	MOVL	(SP), AX	// tv_sec from struct timespec
-	MOVL 	4(SP), BX // tv_nsec
+	MOVL 	4(SP), DX // tv_nsec
 	ADDL	$64, SP
 	RET
