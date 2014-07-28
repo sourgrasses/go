@@ -97,6 +97,8 @@ includes_Haiku='
 #include <errno.h>
 #include <signal.h>
 #include <sys/resource.h>
+#include <sys/mman.h>
+#include <termios.h>
 '
 
 includes_Linux='

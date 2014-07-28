@@ -59,6 +59,14 @@ var sysdir = func() (sd *sysDir) {
 				"local",
 			},
 		}
+	case "haiku":
+		sd = &sysDir{
+			"/etc",
+			[]string{
+				"group",
+				"passwd",
+			},
+		}
 	default:
 		sd = &sysDir{
 			"/etc",
@@ -287,6 +295,8 @@ func TestReaddirnamesOneAtATime(t *testing.T) {
 	case "windows":
 		dir = Getenv("SystemRoot") + "\\system32"
 	case "plan9":
+		dir = "/bin"
+	case "haiku":
 		dir = "/bin"
 	}
 	file, err := Open(dir)

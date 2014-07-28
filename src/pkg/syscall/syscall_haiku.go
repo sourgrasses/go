@@ -194,53 +194,54 @@ func ReadDirent(fd int, buf []byte) (n int, err error) {
 	panic("Not implemented")
 }
 
-// Wait status is 7 bits at bottom, either 0 (exited),
-// 0x7F (stopped), or a signal number that caused an exit.
-// The 0x80 bit is whether there was a core dump.
-// An extra number (exit code, signal causing a stop)
-// is in the high bits.
+// Wait status: 8 bits at the bottom is exit status
+// If all bits other than the 8 bottom are empty, then exited
+// next 8 bits are signal number that caused exit
+// next 8 bits are signal that caused stop
+// core is 0x10000
+// continued is 0x20000
 
 type WaitStatus uint32
 
 const (
-	mask  = 0x7F
-	core  = 0x80
+	mask  = 0xFF
+	core  = 0x10000
+	continued = 0x20000
 	shift = 8
 
 	exited  = 0
-	stopped = 0x7F
 )
 
-func (w WaitStatus) Exited() bool { return w&mask == exited }
+func (w WaitStatus) Exited() bool { return w&^mask == exited }
 
 func (w WaitStatus) ExitStatus() int {
-	if w&mask != exited {
+	if w&^mask != exited {
 		return -1
 	}
-	return int(w >> shift)
+	return int(w&mask)
 }
 
-func (w WaitStatus) Signaled() bool { return w&mask != stopped && w&mask != 0 }
+func (w WaitStatus) Signaled() bool { return ((w >> 8)&mask) != 0 }
 
 func (w WaitStatus) Signal() Signal {
-	sig := Signal(w & mask)
-	if sig == stopped || sig == 0 {
+	sig := Signal((w >> 8) & mask)
+	if sig == 0 {
 		return -1
 	}
 	return sig
 }
 
-func (w WaitStatus) CoreDump() bool { return w.Signaled() && w&core != 0 }
+func (w WaitStatus) CoreDump() bool { return w&core != 0 }
 
-func (w WaitStatus) Stopped() bool { return w&mask == stopped && Signal(w>>shift) != SIGSTOP }
+func (w WaitStatus) Stopped() bool { return (w >> 16)&mask != 0 }
 
-func (w WaitStatus) Continued() bool { return w&mask == stopped && Signal(w>>shift) == SIGSTOP }
+func (w WaitStatus) Continued() bool { return w&continued != 0}
 
 func (w WaitStatus) StopSignal() Signal {
 	if !w.Stopped() {
 		return -1
 	}
-	return Signal(w>>shift) & 0xFF
+	return Signal(w>>16)&mask
 }
 
 func (w WaitStatus) TrapCause() int { return -1 }
@@ -525,4 +526,18 @@ func writelen(fd int, buf *byte, nbuf int) (n int, err error) {
 		err = e1
 	}
 	return
+}
+
+var mapper = &mmapper{
+	active: make(map[*byte][]byte),
+	mmap:   mmap,
+	munmap: munmap,
+}
+
+func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
+	return mapper.Mmap(fd, offset, length, prot, flags)
+}
+
+func Munmap(b []byte) (err error) {
+	return mapper.Munmap(b)
 }
