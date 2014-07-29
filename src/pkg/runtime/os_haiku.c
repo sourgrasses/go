@@ -288,7 +288,7 @@ extern void runtime·sigtramp(void);
 void
 runtime·setsig(int32 i, GoSighandler *fn, bool restart)
 {
-	/*Sigaction sa;
+	Sigaction sa;
 
 	runtime·memclr((byte*)&sa, sizeof sa);
 	sa.sa_flags = SA_SIGINFO|SA_ONSTACK;
@@ -299,21 +299,18 @@ runtime·setsig(int32 i, GoSighandler *fn, bool restart)
 		fn = (void*)runtime·sigtramp;
 	*((void**)&sa.anon0[0]) = (void*)fn;
 	runtime·sigaction(i, &sa, nil);
-	*/
 }
 
 GoSighandler*
 runtime·getsig(int32 i)
 {
-	/*Sigaction sa;
+	Sigaction sa;
 
 	runtime·memclr((byte*)&sa, sizeof sa);
 	runtime·sigaction(i, nil, &sa);
 	if(*((void**)&sa.anon0[0]) == runtime·sigtramp)
 		return runtime·sighandler;
 	return *((void**)&sa.anon0[0]);
-	*/
-	return (void*) 0x1c1c1e;
 }
 
 void

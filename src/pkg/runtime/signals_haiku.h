@@ -20,7 +20,7 @@ SigTab runtime·sigtab[] = {
 	/* 8 */	P, "SIGFPE: floating point exception",
 	/* 9 */	0, "SIGKILL: killed (by death)",
 	/* 10 */	0, "SIGSTOP: stopped",
-	/* 11 */	D, "SIGSEGV: segmentation violation",
+	/* 11 */	P, "SIGSEGV: segmentation violation",
 	/* 12 */	0, "SIGCONT: continued",
 	/* 13 */	N+D, "SIGTSTP: stopped (tty output)",
 	/* 14 */	N, "SIGALRM: alarm",

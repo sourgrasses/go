@@ -158,9 +158,11 @@ TEXT runtime·sigtramp(SB),NOSPLIT,$88
 	MOVL	20(DI), AX
 	MOVL	AX, 64(SP)
 	// save errno
-//	MOVL	m_perrno(BX), DI
-//	MOVL	0(DI), DI
-//	MOVL	DI, 68(SP)
+	MOVL	m_perrno(BX), DI
+	MOVL	0(DI), DI
+	MOVL	DI, 68(SP)
+
+	MOVL	g(CX), DI
 
 	// g = m->gsignal
 	MOVL	m_gsignal(BX), BX
@@ -177,14 +179,14 @@ TEXT runtime·sigtramp(SB),NOSPLIT,$88
 
 	CALL	runtime·sighandler(SB)
 
-	// reload TLS and M
-	get_tls(CX)
-	MOVL	m(CX), BX
-
 	// restore g
 	get_tls(CX)
 	MOVL	20(SP), BX
 	MOVL	BX, g(CX)
+
+	// reload TLS and M
+	MOVL	m(CX), BX
+
 	// restore libcall
 	LEAL	m_libcall(BX), DI
 	MOVL	24(SP), AX
@@ -214,9 +216,9 @@ TEXT runtime·sigtramp(SB),NOSPLIT,$88
 	MOVL	AX, 20(DI)
 
 	// restore errno
-//	MOVL	m_perrno(BX), DI
-//	MOVL	68(SP), AX
-//	MOVL	AX, 0(DI)
+	MOVL	m_perrno(BX), DI
+	MOVL	68(SP), AX
+	MOVL	AX, 0(DI)
 sigtramp_ret:
 	// restore registers
 	MOVL	72(SP), BX
