@@ -9,6 +9,12 @@ package syscall
 #include "cgocall.h"
 #include "../../cmd/ld/textflag.h"
 
+#ifdef GOARCH_386
+#define FUNC(a) ((uintptr) &a)
+#else
+#define FUNC(a) (a)
+#endif
+
 #pragma dynimport libc·chdir chdir "libroot.so"
 #pragma dynimport libc·chroot chroot "libroot.so"
 #pragma dynimport libc·close close "libroot.so"
@@ -95,7 +101,7 @@ func rawSysvicall6(func uintptr, nargs uintptr, a1 uintptr, a2 uintptr, a3 uintp
 func chdir(path uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·chdir;
+	c.fn = (void*) FUNC(libc·chdir);
 	c.n = 1;
 	c.args = (void*)&path;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -106,7 +112,7 @@ func chdir(path uintptr) (err uintptr) {
 func chroot1(path uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·chroot;
+	c.fn = (void*) FUNC(libc·chroot);
 	c.n = 1;
 	c.args = (void*)&path;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -117,7 +123,7 @@ func chroot1(path uintptr) (err uintptr) {
 func close(fd uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·close;
+	c.fn = (void*) FUNC(libc·close);
 	c.n = 1;
 	c.args = (void*)&fd;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -128,7 +134,7 @@ func dlclose(handle uintptr) (err uintptr) {
 	LibCall c;
 
 	USED(handle);
-	c.fn = (void*)(uintptr) &libc·dlclose;
+	c.fn = (void*) FUNC(libc·dlclose);
 	c.n = 1;
 	c.args = (void*)&handle;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
@@ -139,7 +145,7 @@ func dlopen(name *uint8, mode uintptr) (handle uintptr, err uintptr) {
 	LibCall c;
 
 	USED(mode);
-	c.fn = (void*)(uintptr) &libc·dlopen;
+	c.fn = (void*) FUNC(libc·dlopen);
 	c.n = 2;
 	c.args = (void*)&name;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
@@ -154,7 +160,7 @@ func dlsym(handle uintptr, name *uint8) (proc uintptr, err uintptr) {
 	LibCall c;
 
 	USED(name);
-	c.fn = (void*)(uintptr) &libc·dlsym;
+	c.fn = (void*) FUNC(libc·dlsym);
 	c.n = 2;
 	c.args = &handle;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
@@ -169,7 +175,7 @@ func dlsym(handle uintptr, name *uint8) (proc uintptr, err uintptr) {
 func dup2(fd1 uintptr, fd2 uintptr) (val uintptr, err uintptr) {
 	LibCall c;
 	USED(fd2);
-	c.fn = (void*)(uintptr) &libc·dup2;
+	c.fn = (void*) FUNC(libc·dup2);
 	c.n = 2;
 	c.args = (void*) &fd1;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -183,7 +189,7 @@ func execve(path uintptr, argv uintptr, envp uintptr) (err uintptr) {
 
 	USED(argv);
 	USED(envp);
-	c.fn = (void*)(uintptr) &libc·execve;
+	c.fn = (void*) FUNC(libc·execve);
 	c.n = 3;
 	c.args = (void*)&path;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -194,7 +200,7 @@ func execve(path uintptr, argv uintptr, envp uintptr) (err uintptr) {
 func exit(code uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·exit;
+	c.fn = (void*) FUNC(libc·exit);
 	c.n = 1;
 	c.args = (void*)&code;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -206,7 +212,7 @@ func fcntl1(fd uintptr, cmd uintptr, arg uintptr) (val uintptr, err uintptr) {
 
 	USED(cmd);
 	USED(arg);
-	c.fn = (void*)(uintptr) &libc·fcntl;
+	c.fn = (void*) FUNC(libc·fcntl);
 	c.n = 3;
 	c.args = (void*)&fd;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -219,7 +225,7 @@ func gethostname() (name String, err uintptr) {
 	uint8 cname[HOST_NAME_MAX];
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·gethostname;
+	c.fn = (void*) FUNC(libc·gethostname);
 	c.n = 2;
 	args.v[0] = (uintptr)&cname[0];
 	args.v[1] = HOST_NAME_MAX;
@@ -240,7 +246,7 @@ func ioctl(fd uintptr, req uintptr, arg uintptr) (err uintptr) {
 
 	USED(req);
 	USED(arg);
-	c.fn = (void*)(uintptr) &libc·ioctl;
+	c.fn = (void*) FUNC(libc·ioctl);
 	c.n = 3;
 	c.args = (void*)&fd;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -252,7 +258,7 @@ func wait4(pid uintptr, wstatus *uint32, options uintptr, rusage *void) (wpid in
 
 	USED(wstatus);
 	USED(options);
-	c.fn = (void*)(uintptr) &libc·waitpid;
+	c.fn = (void*) FUNC(libc·waitpid);
 	c.n = 3;
 	c.args = (void*)&pid;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
@@ -264,7 +270,7 @@ func wait4(pid uintptr, wstatus *uint32, options uintptr, rusage *void) (wpid in
 func setgid(gid uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·setgid;
+	c.fn = (void*) FUNC(libc·setgid);
 	c.n = 1;
 	c.args = (void*)&gid;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -276,7 +282,7 @@ func setgroups1(ngid uintptr, gid uintptr) (err uintptr) {
 	LibCall c;
 
 	USED(gid);
-	c.fn = (void*)(uintptr) &libc·setgroups;
+	c.fn = (void*) FUNC(libc·setgroups);
 	c.n = 2;
 	c.args = (void*)&ngid;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -287,7 +293,7 @@ func setgroups1(ngid uintptr, gid uintptr) (err uintptr) {
 func setsid() (pid uintptr, err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·setsid;
+	c.fn = (void*) FUNC(libc·setsid);
 	c.n = 0;
 	c.args = (void*)0;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -299,7 +305,7 @@ func setsid() (pid uintptr, err uintptr) {
 func setuid(uid uintptr) (err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·setuid;
+	c.fn = (void*) FUNC(libc·setuid);
 	c.n = 1;
 	c.args = (void*)&uid;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -311,7 +317,7 @@ func setpgid(pid uintptr, pgid uintptr) (err uintptr) {
 	LibCall c;
 
 	USED(pgid);
-	c.fn = (void*)(uintptr) &libc·setpgid;
+	c.fn = (void*) FUNC(libc·setpgid);
 	c.n = 2;
 	c.args = (void*)&pid;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -322,7 +328,7 @@ func setpgid(pid uintptr, pgid uintptr) (err uintptr) {
 func forkx(flags uintptr) (pid uintptr, err uintptr) {
 	LibCall c;
 
-	c.fn = (void*)(uintptr) &libc·fork;
+	c.fn = (void*) FUNC(libc·fork);
 	c.n = 0;
 	c.args = (void*)0;//&flags;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -351,7 +357,7 @@ func write1(fd uintptr, buf uintptr, nbyte uintptr) (n uintptr, err uintptr) {
 
 	USED(buf);
 	USED(nbyte);
-	c.fn = (void*)(uintptr) &libc·write;
+	c.fn = (void*) FUNC(libc·write);
 	c.n = 3;
 	c.args = (void*)fd;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
@@ -367,7 +373,7 @@ func mmap(addr uintptr, length uintptr, prot uintptr, flag uintptr, fd uintptr, 
 	USED(flag);
 	USED(fd);
 	USED(pos);
-	c.fn = (void*)(uintptr) &libc·mmap;
+	c.fn = (void*) FUNC(libc·mmap);
 	c.n = 7;
 	c.args = &addr;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
@@ -384,7 +390,7 @@ func Syscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r2 u
 	USED(trap);
 	runtime·throw("Syscall not supported on Haiku");
 	/*
-	c.fn = (void*)(uintptr) &libc·syscall;
+	c.fn = (void*) FUNC(libc·syscall);
 	c.n = 4;
 	c.args = &trap;
 	runtime·cgocall(runtime·asmsysvicall6, &c);
@@ -403,7 +409,7 @@ func RawSyscall(trap uintptr, a1 uintptr, a2 uintptr, a3 uintptr) (r1 uintptr, r
 	USED(trap);
 	runtime·throw("Syscall not supported on Haiku");
 	/*
-	c.fn = (void*)(uintptr) &libc·syscall;
+	c.fn = (void*) FUNC(libc·syscall);
 	c.n = 4;
 	c.args = &trap;
 	runtime·asmcgocall(runtime·asmsysvicall6, &c);
