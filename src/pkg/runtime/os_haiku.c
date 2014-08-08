@@ -85,7 +85,7 @@ void	runtime·getcontext(Ucontext *context);
 int32	runtime·pthread_attr_destroy(PthreadAttr* attr);
 int32	runtime·pthread_attr_init(PthreadAttr* attr);
 //TODO: uint32/uint64 problem needs to be solved
-int32	runtime·pthread_attr_getstacksize(PthreadAttr* attr, uint32* size);
+int32	runtime·pthread_attr_getstacksize(PthreadAttr* attr, uintptr* size);
 int32	runtime·pthread_attr_setdetachstate(PthreadAttr* attr, int32 state);
 int32	runtime·pthread_attr_setstack(PthreadAttr* attr, void* addr, uint32 size);
 int32	runtime·pthread_create(Pthread* thread, PthreadAttr* attr, void(*fn)(void), void *arg);
@@ -360,9 +360,14 @@ int32
 runtime·semasleep(int64 ns)
 {
 	if(ns >= 0) {
-		ns += runtime·nanotime();
-		// because 64-bit divide generates a call to a split stack method, which we can't call
-		m->ts.tv_sec = _div64by32(ns, 1000000000, &(m->ts.tv_nsec));
+		//ns += runtime·nanotime();
+		if (sizeof(void*) == 8) {
+			m->ts.tv_sec = ns / 1000000000LL;
+			m->ts.tv_nsec = ns % 1000000000LL;
+		} else {
+			// because 64-bit divide generates a call to a split stack method, which we can't call
+			m->ts.tv_sec = _div64by32(ns, 1000000000, &(m->ts.tv_nsec));
+		}
 
 		m->libcall.fn = (void*)(uintptr) &libc·sem_timedwait;
 		m->libcall.n = 2;
@@ -445,6 +450,9 @@ int64
 runtime·nanotime(void)
 {
 	runtime·sysvicall6((uintptr)runtime·nanotime1, 0);
+	if (sizeof(void*) == 8) { // on 64-bit the assembly wrapper does the multiplication
+		return m->libcall.r1;
+	}
 	return (m->libcall.r1 * 1000000000LL) + m->libcall.r2;
 }
 
@@ -472,10 +480,8 @@ runtime·pthread_attr_destroy(PthreadAttr* attr)
 	return runtime·sysvicall6((uintptr) &libc·pthread_attr_destroy, 1, (uintptr)attr);
 }
 
-//TODO size should be defined as a size_t for compat with 64-bit
-
 int32
-runtime·pthread_attr_getstacksize(PthreadAttr* attr, uint32* size)
+runtime·pthread_attr_getstacksize(PthreadAttr* attr, uintptr* size)
 {
 	return runtime·sysvicall6((uintptr) &libc·pthread_attr_getstacksize, 2, (uintptr)attr, (uintptr)size);
 }

@@ -705,7 +705,7 @@ main(int argc, char **argv)
 	run(&b, nil, 0, "uname", "-p", nil);
 	if(contains(bstr(&b), "x86_64"))
 		gohostarch = "amd64";
-	if(contains(bstr(&b), "x86"))
+	else if(contains(bstr(&b), "x86"))
 		gohostarch = "386";	 
 #else
 	fatal("unknown operating system");

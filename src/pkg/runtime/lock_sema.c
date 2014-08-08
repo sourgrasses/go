@@ -193,7 +193,11 @@ notetsleep(Note *n, int64 ns, int64 deadline, M *mp)
 	for(;;) {
 		// Registered.  Sleep.
 		m->blocked = true;
+#ifdef GOOS_haiku
+		if(runtime·semasleep(deadline) >= 0) { // FIXME: haiku doesn't have a relative sem wait
+#else
 		if(runtime·semasleep(ns) >= 0) {
+#endif
 			m->blocked = false;
 			// Acquired semaphore, semawakeup unregistered us.
 			// Done.

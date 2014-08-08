@@ -77,6 +77,7 @@ archinit(void)
 	case Hnetbsd:
 	case Hopenbsd:
 	case Hsolaris:
+	case Hhaiku:
 		break;
 	}
 
@@ -118,6 +119,7 @@ archinit(void)
 	case Hopenbsd:		/* openbsd */
 	case Hdragonfly:	/* dragonfly */
 	case Hsolaris:		/* solaris */
+	case Hhaiku:		/* haiku */
 		elfinit();
 		HEADR = ELFRESERVE;
 		if(INITTEXT == -1)

@@ -1935,7 +1935,7 @@ oclass(Link *ctxt, Addr *a)
 				switch(a->index) {
 				case D_EXTERN:
 				case D_STATIC:
-					if(ctxt->flag_shared || ctxt->headtype == Hnacl)
+					if(ctxt->flag_shared || ctxt->headtype == Hnacl || ctxt->headtype == Hhaiku)
 						return Yiauto;
 					else
 						return Yi32;	/* TO DO: Yi64 */
@@ -2293,7 +2293,7 @@ vaddr(Link *ctxt, Addr *a, Reloc *r)
 		r->sym = s;
 		r->add = v;
 		v = 0;
-		if(ctxt->flag_shared || ctxt->headtype == Hnacl) {
+		if(ctxt->flag_shared || ctxt->headtype == Hnacl || ctxt->headtype == Hhaiku) {
 			if(s->type == STLSBSS) {
 				r->xadd = r->add - r->siz;
 				r->type = R_TLS;
@@ -2338,7 +2338,7 @@ asmandsz(Link *ctxt, Addr *a, int r, int rex, int m64)
 				goto bad;
 			case D_STATIC:
 			case D_EXTERN:
-				if(ctxt->flag_shared || ctxt->headtype == Hnacl)
+				if(ctxt->flag_shared || ctxt->headtype == Hnacl || ctxt->headtype == Hhaiku)
 					goto bad;
 				t = D_NONE;
 				v = vaddr(ctxt, a, &rel);
@@ -2402,7 +2402,7 @@ asmandsz(Link *ctxt, Addr *a, int r, int rex, int m64)
 
 	ctxt->rexflag |= (regrex[t] & Rxb) | rex;
 	if(t == D_NONE || (D_CS <= t && t <= D_GS) || t == D_TLS) {
-		if((ctxt->flag_shared || ctxt->headtype == Hnacl) && t == D_NONE && (a->type == D_STATIC || a->type == D_EXTERN) || ctxt->asmode != 64) {
+		if((ctxt->flag_shared || ctxt->headtype == Hnacl || ctxt->headtype == Hhaiku) && t == D_NONE && (a->type == D_STATIC || a->type == D_EXTERN) || ctxt->asmode != 64) {
 			*ctxt->andptr++ = (0 << 6) | (5 << 0) | (r << 3);
 			goto putrelv;
 		}
@@ -3387,6 +3387,19 @@ mfound:
 			pp.from.scale = 0;
 			ctxt->rexflag |= Pw;
 			*ctxt->andptr++ = 0x65; // GS
+			*ctxt->andptr++ = 0x8B;
+			asmand(ctxt, &pp.from, &p->to);
+			break;
+
+		case Hhaiku:
+			// Haiku TLS base is 0(FS).
+			pp.from = p->from;
+			pp.from.type = D_INDIR+D_GS;
+			pp.from.offset = 0;
+			pp.from.index = D_NONE;
+			pp.from.scale = 0;
+			ctxt->rexflag |= Pw;
+			*ctxt->andptr++ = 0x64; // FS
 			*ctxt->andptr++ = 0x8B;
 			asmand(ctxt, &pp.from, &p->to);
 			break;
