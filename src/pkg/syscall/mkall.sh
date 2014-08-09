@@ -160,6 +160,12 @@ haiku_386)
 	mksysnum=
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
+haiku_amd64)
+	mkerrors="$mkerrors -m64"
+	mksyscall="./mksyscall_solaris.pl -modname libroot"
+	mksysnum=
+	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
+	;;
 linux_386)
 	mkerrors="$mkerrors -m32"
 	mksyscall="./mksyscall.pl -l32"

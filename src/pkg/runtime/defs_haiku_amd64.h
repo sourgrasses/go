@@ -1,5 +1,5 @@
 // Created by cgo -cdefs - DO NOT EDIT
-// cgo -cdefs defs_solaris.go defs_solaris_amd64.go
+// cgo -cdefs defs_haiku.go
 
 
 enum {
@@ -18,8 +18,6 @@ enum {
 	MAP_ANON	= 0x8,
 	MAP_PRIVATE	= 0x2,
 	MAP_FIXED	= 0x4,
-
-	MADV_FREE	= 0x5,
 
 	SA_SIGINFO	= 0x40,
 	SA_RESTART	= 0x10,
@@ -76,9 +74,6 @@ enum {
 
 	PTHREAD_CREATE_DETACHED	= 0x1,
 
-	FORK_NOSIGCHLD	= 0x1,
-	FORK_WAITPID	= 0x2,
-
 	HOST_NAME_MAX	= 0xff,
 
 	O_NONBLOCK	= 0x80,
@@ -95,36 +90,26 @@ enum {
 };
 
 typedef struct SemT SemT;
-typedef struct Sigaltstack Sigaltstack;
 typedef struct StackT StackT;
 typedef struct Siginfo Siginfo;
 typedef struct Sigaction Sigaction;
-typedef struct Fpregset Fpregset;
+typedef struct ExtendedRegs ExtendedRegs;
+typedef struct XmmRegs XmmRegs;
+typedef struct FpuState FpuState;
 typedef struct Mcontext Mcontext;
 typedef struct Ucontext Ucontext;
 typedef struct Timespec Timespec;
 typedef struct Timeval Timeval;
 typedef struct Itimerval Itimerval;
-typedef struct PortEvent PortEvent;
-typedef struct PthreadAttr PthreadAttr;
 typedef struct Stat Stat;
 
 #pragma pack on
 
 struct SemT {
-	uint32	sem_count;
-	uint16	sem_type;
-	uint16	sem_magic;
-	uint64	sem_pad1[3];
-	uint64	sem_pad2[2];
+	int32	id;
+	int32	_padding[3];
 };
 
-struct Sigaltstack {
-	byte	*ss_sp;
-	uint64	ss_size;
-	int32	ss_flags;
-	byte	Pad_cgo_0[4];
-};
 typedef	uint64	Sigset;
 struct StackT {
 	byte	*ss_sp;
@@ -132,114 +117,126 @@ struct StackT {
 	int32	ss_flags;
 	byte	Pad_cgo_0[4];
 };
+typedef	StackT	Sigaltstack;
 
 struct Siginfo {
 	int32	si_signo;
 	int32	si_code;
 	int32	si_errno;
-	int32	si_pad;
-	byte	__data[240];
+	int32	si_pid;
+	uint32	si_uid;
+	byte	Pad_cgo_0[4];
+	byte	*si_addr;
+	int32	si_status;
+	byte	Pad_cgo_1[4];
+	int64	si_band;
+	byte	si_value[8];
 };
 struct Sigaction {
 	byte	anon0[8];
 	uint64	sa_mask;
 	int32	sa_flags;
+	byte	Pad_cgo_0[4];
 	byte	*sa_userdata;
 };
 
-struct Fpregset {
-	byte	fp_reg_set[528];
+
+struct XmmRegs {
+	uint8	xmm0[16];
+	uint8	xmm1[16];
+	uint8	xmm2[16];
+	uint8	xmm3[16];
+	uint8	xmm4[16];
+	uint8	xmm5[16];
+	uint8	xmm6[16];
+	uint8	xmm7[16];
+	uint8	xmm8[16];
+	uint8	xmm9[16];
+	uint8	xmm10[16];
+	uint8	xmm11[16];
+	uint8	xmm12[16];
+	uint8	xmm13[16];
+	uint8	xmm14[16];
+	uint8	xmm15[16];
 };
+struct FpuState {
+	uint16	control;
+	uint16	status;
+	uint16	tag;
+	uint16	opcode;
+	uint64	rip;
+	uint64	rdp;
+	uint32	mxcsr;
+	uint32	mscsr_mask;
+	byte	anon0[128];
+	XmmRegs	xmm;
+	uint8	_reserved_416_511[96];
+};
+
 struct Mcontext {
-	int64	gregs[28];
-	Fpregset	fpregs;
+	uint64	rax;
+	uint64	rbx;
+	uint64	rcx;
+	uint64	rdx;
+	uint64	rdi;
+	uint64	rsi;
+	uint64	rbp;
+	uint64	r8;
+	uint64	r9;
+	uint64	r10;
+	uint64	r11;
+	uint64	r12;
+	uint64	r13;
+	uint64	r14;
+	uint64	r15;
+	uint64	rsp;
+	uint64	rip;
+	uint64	rflags;
+	FpuState	fpu;
 };
 struct Ucontext {
-	uint64	uc_flags;
 	Ucontext	*uc_link;
-	Sigset	uc_sigmask;
+	uint64	uc_sigmask;
 	StackT	uc_stack;
-	byte	Pad_cgo_0[8];
 	Mcontext	uc_mcontext;
-	int64	uc_filler[5];
-	byte	Pad_cgo_1[8];
 };
 
 struct Timespec {
-	int64	tv_sec;
+	int32	tv_sec;
+	byte	Pad_cgo_0[4];
 	int64	tv_nsec;
 };
 struct Timeval {
-	int64	tv_sec;
-	int64	tv_usec;
+	int32	tv_sec;
+	int32	tv_usec;
 };
 struct Itimerval {
 	Timeval	it_interval;
 	Timeval	it_value;
 };
 
-struct PortEvent {
-	int32	portev_events;
-	uint16	portev_source;
-	uint16	portev_pad;
-	uint64	portev_object;
-	byte	*portev_user;
-};
-typedef	uint32	Pthread;
-struct PthreadAttr {
-	byte	*__pthread_attrp;
-};
+typedef	void	*Pthread;
+typedef	void	*PthreadAttr;
 
 struct Stat {
-	uint64	st_dev;
-	uint64	st_ino;
+	int32	st_dev;
+	byte	Pad_cgo_0[4];
+	int64	st_ino;
 	uint32	st_mode;
-	uint32	st_nlink;
+	int32	st_nlink;
 	uint32	st_uid;
 	uint32	st_gid;
-	uint64	st_rdev;
 	int64	st_size;
+	int32	st_rdev;
+	int32	st_blksize;
 	Timespec	st_atim;
 	Timespec	st_mtim;
 	Timespec	st_ctim;
-	int32	st_blksize;
-	byte	Pad_cgo_0[4];
+	Timespec	st_crtim;
+	uint32	st_type;
+	byte	Pad_cgo_1[4];
 	int64	st_blocks;
-	int8	st_fstype[16];
 };
 
 
 #pragma pack off
-// Created by cgo -cdefs - DO NOT EDIT
-// cgo -cdefs defs_solaris.go defs_solaris_amd64.go
-
-
-enum {
-	REG_RDI		= 0x8,
-	REG_RSI		= 0x9,
-	REG_RDX		= 0xc,
-	REG_RCX		= 0xd,
-	REG_R8		= 0x7,
-	REG_R9		= 0x6,
-	REG_R10		= 0x5,
-	REG_R11		= 0x4,
-	REG_R12		= 0x3,
-	REG_R13		= 0x2,
-	REG_R14		= 0x1,
-	REG_R15		= 0x0,
-	REG_RBP		= 0xa,
-	REG_RBX		= 0xb,
-	REG_RAX		= 0xe,
-	REG_GS		= 0x17,
-	REG_FS		= 0x16,
-	REG_ES		= 0x18,
-	REG_DS		= 0x19,
-	REG_TRAPNO	= 0xf,
-	REG_ERR		= 0x10,
-	REG_RIP		= 0x11,
-	REG_CS		= 0x12,
-	REG_RFLAGS	= 0x13,
-	REG_RSP		= 0x14,
-	REG_SS		= 0x15,
-};
-

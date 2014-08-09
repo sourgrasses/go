@@ -12,6 +12,7 @@
 
 package syscall
 
+import "runtime"
 import "unsafe"
 
 /*type SockaddrDatalink struct {
@@ -62,11 +63,16 @@ func ParseDirent(buf []byte, max int, names []string) (consumed int, count int, 
 	return origlen - len(buf), count, names
 }
 
-/*func pipe() (r uintptr, w uintptr, err uintptr)
+func pipe() (r uintptr, w uintptr, err uintptr)
+
+//sys	pipe2(fds []int) (err error) = libroot.pipe
 
 func Pipe(p []int) (err error) {
 	if len(p) != 2 {
 		return EINVAL
+	}
+	if (runtime.GOARCH == "386") {
+		return pipe2(p)
 	}
 	r0, w0, e1 := pipe()
 	if e1 != 0 {
@@ -74,7 +80,7 @@ func Pipe(p []int) (err error) {
 	}
 	p[0], p[1] = int(r0), int(w0)
 	return
-}*/
+}
 
 func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	if sa.Port < 0 || sa.Port > 0xFFFF {
@@ -273,7 +279,7 @@ func UtimesNano(path string, ts []Timespec) (err error) {
 	var tv [2]Timeval
 	for i := 0; i < 2; i++ {
 		tv[i].Sec = ts[i].Sec
-		tv[i].Usec = ts[i].Nsec / 1000
+		tv[i].Usec = int32(ts[i].Nsec / 1000)
 	}
 	return Utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
 }
@@ -508,7 +514,6 @@ func mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (
 //sys	Fdopendir(fd int) (dir unsafe.Pointer, err error)
 //sys	Readdir_r(dir unsafe.Pointer, entry *Dirent, result **Dirent) (status int)
 //sys	Closedir(dir unsafe.Pointer) (status int, err error)
-//sys	Pipe(fds []int) (err error)
 
 func readlen(fd int, buf *byte, nbuf int) (n int, err error) {
 	r0, _, e1 := sysvicall6(procread.Addr(), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)

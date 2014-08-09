@@ -24,6 +24,19 @@ package runtime
 #include <pthread.h>
 
 #include <kernel/OS.h>
+
+#ifdef __x86_64__
+struct extended_regs {
+	// not used anywhere; just to make this file compile (stub of struct used in the 386 version)
+};
+#else
+struct xmm_regs {
+	// not used anywhere, just to make this compile (stub of struct used in x86_64)
+}
+struct fpu_state {
+	// ditto
+}
+#endif
 */
 import "C"
 
@@ -125,7 +138,11 @@ type Siginfo C.siginfo_t
 type Sigaction C.struct_sigaction
 
 // needed by Mcontext
+// for 386
 type ExtendedRegs C.struct_extended_regs
+// for amd64
+type XmmRegs C.struct_xmm_regs
+type FpuState C.struct_fpu_state
 
 type Mcontext C.mcontext_t
 type Ucontext C.ucontext_t

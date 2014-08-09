@@ -374,10 +374,14 @@ struct	M
 	// these are here because they are too large to be on the stack
 	// of low-level NOSPLIT functions.
 	LibCall	libcall;
-	// FIXME: haiku: what about 64-bit timespecs on amd64?
 	struct {
 		int32	tv_sec;
+#ifdef GOARCH_amd64
+		byte	Pad_cgo_0[4]; //for alignment
+		int64	tv_nsec;
+#else
 		int32	tv_nsec;
+#endif
 	} ts;
 	struct {
 		uintptr v[6];

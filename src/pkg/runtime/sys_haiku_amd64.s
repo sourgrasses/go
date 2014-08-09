@@ -45,7 +45,6 @@ TEXT runtime·nanotime1(SB),NOSPLIT,$0
 	ADDQ	$64, SP
 	RET
 
-/*
 // pipe(3c) wrapper that returns fds in AX, DX.
 TEXT runtime·pipe1(SB),NOSPLIT,$0
 	SUBQ	$16, SP // 8 bytes will do, but stack has to be 16-byte alligned
@@ -56,7 +55,6 @@ TEXT runtime·pipe1(SB),NOSPLIT,$0
 	MOVL	4(SP), DX
 	ADDQ	$16, SP
 	RET
-*/
 
 // Call a library function with SysV calling conventions.
 // The called function can take a maximum of 6 INTEGER class arguments,

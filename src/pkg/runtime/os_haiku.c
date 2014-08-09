@@ -372,14 +372,13 @@ int32
 runtime·semasleep(int64 ns)
 {
 	if(ns >= 0) {
-		//ns += runtime·nanotime();
-		if (sizeof(void*) == 8) {
-			m->ts.tv_sec = ns / 1000000000LL;
-			m->ts.tv_nsec = ns % 1000000000LL;
-		} else {
-			// because 64-bit divide generates a call to a split stack method, which we can't call
-			m->ts.tv_sec = _div64by32(ns, 1000000000, &(m->ts.tv_nsec));
-		}
+#ifdef GOARCH_amd64
+		m->ts.tv_sec = ns / 1000000000LL;
+		m->ts.tv_nsec = ns % 1000000000LL;
+#else
+		// because 64-bit divide generates a call to a split stack method, which we can't call
+		m->ts.tv_sec = _div64by32(ns, 1000000000, &(m->ts.tv_nsec));
+#endif
 
 		m->libcall.fn = (void*) FUNC(libc·sem_timedwait);
 		m->libcall.n = 2;
@@ -609,10 +608,11 @@ runtime·area_for(void* addr)
 	return (uintptr)runtime·sysvicall6(FUNC(libc·area_for), 1, (uintptr)addr);
 }
 
-
+#ifndef GOARCH_amd64
 // STUB
 void
 runtime·pipe1(void)
 {
 	runtime·throw("Pipe not implemented");
 }
+#endif
