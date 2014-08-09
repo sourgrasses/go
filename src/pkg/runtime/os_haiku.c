@@ -208,7 +208,6 @@ void
 runtime·minit(void)
 {
 	runtime·asmcgocall(runtime·miniterrno, (void *) FUNC(libc·_errnop));
-	if (sizeof(void*) == 8) return;
 	// Initialize signal handling
 	runtime·signalstack((byte*)m->gsignal->stackguard - StackGuard, 32*1024);
 	runtime·sigprocmask(SIG_SETMASK, &sigset_none, nil);
@@ -298,7 +297,6 @@ void
 runtime·setsig(int32 i, GoSighandler *fn, bool restart)
 {
 	Sigaction sa;
-	if (sizeof(void*) == 8) return;
 
 	runtime·memclr((byte*)&sa, sizeof sa);
 	sa.sa_flags = SA_SIGINFO|SA_ONSTACK;
@@ -315,7 +313,6 @@ GoSighandler*
 runtime·getsig(int32 i)
 {
 	Sigaction sa;
-	if (sizeof(void*) == 8) return (void*) 0x1c1c1e;
 
 	runtime·memclr((byte*)&sa, sizeof sa);
 	runtime·sigaction(i, nil, &sa);
@@ -328,7 +325,6 @@ void
 runtime·signalstack(byte *p, int32 n)
 {
 	StackT st;
-	if (sizeof(void*) == 8) return;
 
 	st.ss_sp = (void*)p;
 	st.ss_size = n;

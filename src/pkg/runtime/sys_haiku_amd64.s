@@ -39,7 +39,7 @@ TEXT runtime·nanotime1(SB),NOSPLIT,$0
 	MOVQ	SP, SI
 	MOVQ	libc·clock_gettime(SB), AX
 	CALL	AX
-	MOVQ	(SP), AX	// tv_sec from struct timespec
+	MOVL	(SP), AX	// tv_sec from struct timespec
 	IMULQ	$1000000000, AX	// multiply into nanoseconds
 	ADDQ	8(SP), AX	// tv_nsec, offset should be stable.
 	ADDQ	$64, SP
