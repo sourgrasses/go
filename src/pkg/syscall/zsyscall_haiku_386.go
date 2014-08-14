@@ -9,6 +9,7 @@ var (
 	modlibroot    = newLazySO("libroot.so")
 	modlibnetwork = newLazySO("libnetwork.so")
 
+	procpipe         = modlibroot.NewProc("pipe")
 	procgetgroups    = modlibroot.NewProc("getgroups")
 	procsetgroups    = modlibroot.NewProc("setgroups")
 	procfcntl        = modlibroot.NewProc("fcntl")
@@ -90,8 +91,19 @@ var (
 	procFdopendir    = modlibroot.NewProc("fdopendir")
 	procReaddir_r    = modlibroot.NewProc("readdir_r")
 	procClosedir     = modlibroot.NewProc("closedir")
-	procPipe         = modlibroot.NewProc("pipe")
 )
+
+func pipe2(fds []int) (err error) {
+	var _p0 *int
+	if len(fds) > 0 {
+		_p0 = &fds[0]
+	}
+	_, _, e1 := sysvicall6(procpipe.Addr(), 2, uintptr(unsafe.Pointer(_p0)), uintptr(len(fds)), 0, 0, 0, 0)
+	if e1 != 0 {
+		err = e1
+	}
+	return
+}
 
 func getgroups(ngid int, gid *_Gid_t) (n int, err error) {
 	r0, _, e1 := rawSysvicall6(procgetgroups.Addr(), 2, uintptr(ngid), uintptr(unsafe.Pointer(gid)), 0, 0, 0, 0)
@@ -880,18 +892,6 @@ func Readdir_r(dir unsafe.Pointer, entry *Dirent, result **Dirent) (status int) 
 func Closedir(dir unsafe.Pointer) (status int, err error) {
 	r0, _, e1 := sysvicall6(procClosedir.Addr(), 1, uintptr(dir), 0, 0, 0, 0, 0)
 	status = int(r0)
-	if e1 != 0 {
-		err = e1
-	}
-	return
-}
-
-func Pipe(fds []int) (err error) {
-	var _p0 *int
-	if len(fds) > 0 {
-		_p0 = &fds[0]
-	}
-	_, _, e1 := sysvicall6(procPipe.Addr(), 2, uintptr(unsafe.Pointer(_p0)), uintptr(len(fds)), 0, 0, 0, 0)
 	if e1 != 0 {
 		err = e1
 	}
