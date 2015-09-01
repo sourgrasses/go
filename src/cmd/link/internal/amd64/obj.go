@@ -105,6 +105,7 @@ func archinit() {
 
 	case obj.Hdarwin,
 		obj.Hdragonfly,
+		obj.Hhaiku,
 		obj.Hfreebsd,
 		obj.Hlinux,
 		obj.Hnacl,
@@ -161,6 +162,7 @@ func archinit() {
 
 	case obj.Hlinux, /* elf64 executable */
 		obj.Hfreebsd,   /* freebsd */
+		obj.Hhaiku,     /* haiku */
 		obj.Hnetbsd,    /* netbsd */
 		obj.Hopenbsd,   /* openbsd */
 		obj.Hdragonfly, /* dragonfly */

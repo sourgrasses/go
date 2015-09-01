@@ -180,6 +180,9 @@ func Ldmain() {
 	if headstring == "" {
 		headstring = Headstr(int(HEADTYPE))
 	}
+	if HEADTYPE == obj.Hhaiku {
+		Linkmode = LinkExternal 
+	}
 
 	Thearch.Archinit()
 

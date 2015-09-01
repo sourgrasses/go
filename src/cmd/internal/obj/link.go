@@ -538,6 +538,7 @@ const (
 	Hdragonfly
 	Helf
 	Hfreebsd
+	Hhaiku
 	Hlinux
 	Hnacl
 	Hnetbsd

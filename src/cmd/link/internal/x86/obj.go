@@ -97,6 +97,7 @@ func archinit() {
 
 	case obj.Hdarwin,
 		obj.Hfreebsd,
+		obj.Hhaiku,
 		obj.Hlinux,
 		obj.Hnetbsd,
 		obj.Hopenbsd,
@@ -137,6 +138,7 @@ func archinit() {
 
 	case obj.Hlinux, /* elf32 executable */
 		obj.Hfreebsd,
+		obj.Hhaiku,
 		obj.Hnetbsd,
 		obj.Hopenbsd:
 		ld.Elfinit()

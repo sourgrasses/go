@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build darwin dragonfly freebsd haiku linux netbsd openbsd solaris
 
 package syscall
 
@@ -99,8 +99,12 @@ func (m *mmapper) Munmap(data []byte) (err error) {
 type Errno uintptr
 
 func (e Errno) Error() string {
-	if 0 <= int(e) && int(e) < len(errors) {
-		s := errors[e]
+	n := e
+	if runtime.GOOS == "haiku" && e != 0 {
+		n = (e & 0x7fffffff) + 1
+	}
+	if 0 <= int(n) && int(n) < len(errors) {
+		s := errors[n]
 		if s != "" {
 			return s
 		}

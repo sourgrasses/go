@@ -70,6 +70,7 @@ var okgoos = []string{
 	"openbsd",
 	"plan9",
 	"windows",
+	"haiku",
 }
 
 // find reports the first index of p in l[0:n], or else -1.
@@ -1080,6 +1081,8 @@ var cgoEnabled = map[string]bool{
 	"dragonfly/amd64": true,
 	"freebsd/386":     true,
 	"freebsd/amd64":   true,
+	"haiku/386":       true,
+	"haiku/amd64":     true,
 	"linux/386":       true,
 	"linux/amd64":     true,
 	"linux/arm":       true,

@@ -147,11 +147,14 @@ func newosproc(mp *m, _ unsafe.Pointer) {
 	if pthread_attr_init(&attr) != 0 {
 		throw("pthread_attr_init")
 	}
-	if pthread_attr_setstack(&attr, 0, 0x200000) != 0 {
-		throw("pthread_attr_setstack")
-	}
-	if pthread_attr_getstack(&attr, unsafe.Pointer(&mp.g0.stack.hi), &size) != 0 {
-		throw("pthread_attr_getstack")
+	//if pthread_attr_setstack(&attr, 0, 0x200000) != 0 {
+	//	throw("pthread_attr_setstack")
+	//}
+	//if pthread_attr_getstack(&attr, unsafe.Pointer(&mp.g0.stack.hi), &size) != 0 {
+	//	throw("pthread_attr_getstack")
+	//}
+	if pthread_attr_getstacksize(&attr, unsafe.Pointer(&mp.g0.stacksize), &size) != 0 {
+		throw("pthread_attr_getstacksize")
 	}
 	mp.g0.stack.lo = mp.g0.stack.hi - uintptr(size)
 	if pthread_attr_setdetachstate(&attr, _PTHREAD_CREATE_DETACHED) != 0 {
@@ -161,6 +164,7 @@ func newosproc(mp *m, _ unsafe.Pointer) {
 	// Disable signals during create, so that the new thread starts
 	// with signals disabled.  It will enable them in minit.
 	sigprocmask(_SIG_SETMASK, &sigset_all, &oset)
+	mp.g0.stack.base = 0xdeadf00d
 	ret = pthread_create(&tid, &attr, funcPC(tstart_sysvicall), unsafe.Pointer(mp))
 	sigprocmask(_SIG_SETMASK, &oset, nil)
 	if ret != 0 {

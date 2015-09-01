@@ -1669,7 +1669,7 @@ func doelf() {
 	// for dynamic internal linker or external linking, so that various
 	// binutils could correctly calculate PT_TLS size.
 	// see https://golang.org/issue/5200.
-	if HEADTYPE != obj.Hopenbsd {
+	if HEADTYPE != obj.Hopenbsd && HEADTYPE != obj.Hhaiku {
 		if Debug['d'] == 0 || Linkmode == LinkExternal {
 			Addstring(shstrtab, ".tbss")
 		}
@@ -2077,6 +2077,10 @@ func Asmbelf(symo int64) {
 
 			case obj.Hsolaris:
 				interpreter = Thearch.Solarisdynld
+
+			case obj.Hhaiku:
+				// FIXME
+				interpreter = Thearch.Linuxdynld
 			}
 		}
 
@@ -2287,7 +2291,7 @@ func Asmbelf(symo int64) {
 		// Do not emit PT_TLS for OpenBSD since ld.so(1) does
 		// not currently support it. This is handled
 		// appropriately in runtime/cgo.
-		if Ctxt.Tlsoffset != 0 && HEADTYPE != obj.Hopenbsd {
+		if Ctxt.Tlsoffset != 0 && HEADTYPE != obj.Hopenbsd && HEADTYPE != obj.Hhaiku {
 			ph := newElfPhdr()
 			ph.type_ = PT_TLS
 			ph.flags = PF_R
@@ -2352,7 +2356,7 @@ elfobj:
 
 	// generate .tbss section for dynamic internal linking (except for OpenBSD)
 	// external linking generates .tbss in data.c
-	if Linkmode == LinkInternal && Debug['d'] == 0 && HEADTYPE != obj.Hopenbsd {
+	if Linkmode == LinkInternal && Debug['d'] == 0 && HEADTYPE != obj.Hopenbsd && HEADTYPE != obj.Hhaiku {
 		sh := elfshname(".tbss")
 		sh.type_ = SHT_NOBITS
 		sh.addralign = uint64(Thearch.Regsize)

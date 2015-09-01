@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+// +build darwin dragonfly freebsd haiku linux netbsd openbsd solaris
 
 // Fork, exec, wait, etc.
 
@@ -96,6 +96,11 @@ func SlicePtrFromStrings(ss []string) ([]*byte, error) {
 func CloseOnExec(fd int) { fcntl(fd, F_SETFD, FD_CLOEXEC) }
 
 func SetNonblock(fd int, nonblocking bool) (err error) {
+	if runtime.GOOS == "haiku" {
+		// FIXME: haiku: we don't have a network poller yet
+		return nil
+	}
+
 	flag, err := fcntl(fd, F_GETFL, 0)
 	if err != nil {
 		return err

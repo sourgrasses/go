@@ -51,6 +51,7 @@ var headers = []struct {
 	{"dragonfly", obj.Hdragonfly},
 	{"elf", obj.Helf},
 	{"freebsd", obj.Hfreebsd},
+	{"haiku", obj.Hhaiku},
 	{"linux", obj.Hlinux},
 	{"android", obj.Hlinux}, // must be after "linux" entry or else headstr(Hlinux) == "android"
 	{"nacl", obj.Hnacl},
@@ -93,6 +94,13 @@ func linknew(arch *LinkArch) *Link {
 		log.Fatalf("unknown thread-local storage offset for %s", Headstr(ctxt.Headtype))
 
 	case obj.Hplan9, obj.Hwindows:
+		break
+
+	case obj.Hhaiku:
+		// on 64-bit we use the last two regular TLS slots
+		if ctxt.Arch.Thechar == '6' {
+			ctxt.Tlsoffset = (64 - 2) * 8
+		}
 		break
 
 		/*

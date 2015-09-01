@@ -682,6 +682,7 @@ func asmb() {
 
 	case obj.Hlinux,
 		obj.Hfreebsd,
+		obj.Hhaiku,
 		obj.Hnetbsd,
 		obj.Hopenbsd,
 		obj.Hdragonfly,
@@ -714,6 +715,7 @@ func asmb() {
 
 		case obj.Hlinux,
 			obj.Hfreebsd,
+			obj.Hhaiku,
 			obj.Hnetbsd,
 			obj.Hopenbsd,
 			obj.Hdragonfly,
@@ -802,6 +804,7 @@ func asmb() {
 
 	case obj.Hlinux,
 		obj.Hfreebsd,
+		obj.Hhaiku,
 		obj.Hnetbsd,
 		obj.Hopenbsd,
 		obj.Hdragonfly,

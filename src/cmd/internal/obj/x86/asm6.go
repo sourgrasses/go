@@ -3822,6 +3822,21 @@ func doasm(ctxt *obj.Link, p *obj.Prog) {
 							ctxt.Andptr[0] = 0x8B
 							ctxt.Andptr = ctxt.Andptr[1:]
 							asmand(ctxt, p, &pp.From, &p.To)
+
+						case obj.Hhaiku:
+							// Haiku TLS base is always 0xfc(FS).
+							pp.From = p.From
+
+							pp.From.Type = obj.TYPE_MEM
+							pp.From.Reg = REG_FS
+							pp.From.Offset = 0xfc
+							pp.From.Index = REG_NONE
+							pp.From.Scale = 0
+							ctxt.Andptr[0] = 0x64
+							ctxt.Andptr = ctxt.Andptr[1:] // FS
+							ctxt.Andptr[0] = 0x8B
+							ctxt.Andptr = ctxt.Andptr[1:]
+							asmand(ctxt, p, &pp.From, &p.To)
 						}
 						break
 					}
@@ -3901,6 +3916,23 @@ func doasm(ctxt *obj.Link, p *obj.Prog) {
 						ctxt.Rexflag |= Pw
 						ctxt.Andptr[0] = 0x65
 						ctxt.Andptr = ctxt.Andptr[1:] // GS
+						ctxt.Andptr[0] = 0x8B
+						ctxt.Andptr = ctxt.Andptr[1:]
+						asmand(ctxt, p, &pp.From, &p.To)
+
+					case obj.Hhaiku:
+						// Haiku TLS base is always 0x0(FS).
+						pp.From = p.From
+
+						pp.From.Type = obj.TYPE_MEM
+						pp.From.Name = obj.NAME_NONE
+						pp.From.Reg = REG_FS
+						pp.From.Offset = 0x0
+						pp.From.Index = REG_NONE
+						pp.From.Scale = 0
+						ctxt.Rexflag |= Pw
+						ctxt.Andptr[0] = 0x64
+						ctxt.Andptr = ctxt.Andptr[1:] // FS
 						ctxt.Andptr[0] = 0x8B
 						ctxt.Andptr = ctxt.Andptr[1:]
 						asmand(ctxt, p, &pp.From, &p.To)

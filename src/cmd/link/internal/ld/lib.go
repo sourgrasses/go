@@ -516,7 +516,9 @@ func loadlib() {
 		// The startup code uses an import of runtime/cgo to decide
 		// whether to initialize the TLS.  So give it one.  This could
 		// be handled differently but it's an unusual case.
-		loadinternal("runtime/cgo")
+		if (HEADTYPE != obj.Hhaiku) {
+			loadinternal("runtime/cgo")
+		}
 
 		if i < len(Ctxt.Library) {
 			if Ctxt.Library[i].Shlib != "" {
@@ -615,7 +617,7 @@ func loadlib() {
 	// binaries, so leave it enabled on OS X (Mach-O) binaries.
 	// Also leave it enabled on Solaris which doesn't support
 	// statically linked binaries.
-	if Buildmode == BuildmodeExe && havedynamic == 0 && HEADTYPE != obj.Hdarwin && HEADTYPE != obj.Hsolaris {
+	if Buildmode == BuildmodeExe && havedynamic == 0 && HEADTYPE != obj.Hdarwin && HEADTYPE != obj.Hsolaris && HEADTYPE != obj.Hhaiku {
 		Debug['d'] = 1
 	}
 
@@ -1022,7 +1024,7 @@ func hostlink() {
 	}
 
 	// Force global symbols to be exported for dlopen, etc.
-	if Iself {
+	if Iself && HEADTYPE != obj.Hhaiku {
 		argv = append(argv, "-rdynamic")
 	}
 
