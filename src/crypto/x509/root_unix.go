@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build dragonfly freebsd linux nacl netbsd openbsd solaris
+// +build dragonfly freebsd haiku linux nacl netbsd openbsd solaris
 
 package x509
 
@@ -17,6 +17,7 @@ var certFiles = []string{
 	"/usr/local/share/certs/ca-root-nss.crt", // FreeBSD/DragonFly
 	"/etc/pki/tls/cacert.pem",                // OpenELEC
 	"/etc/certs/ca-certificates.crt",         // Solaris 11.2+
+	"/system/data/ssl/CARootCertificates.pem", // Haiku
 }
 
 // Possible directories with certificate files; stop after successfully

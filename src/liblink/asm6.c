@@ -3415,6 +3415,19 @@ mfound:
 			*ctxt->andptr++ = 0x8B;
 			asmand(ctxt, &pp.from, &p->to);
 			break;
+
+		case Hhaiku:
+			// Haiku TLS base is 0(FS).
+			pp.from = p->from;
+			pp.from.type = D_INDIR+D_GS;
+			pp.from.offset = 0;
+			pp.from.index = D_NONE;
+			pp.from.scale = 0;
+			ctxt->rexflag |= Pw;
+			*ctxt->andptr++ = 0x64; // FS
+			*ctxt->andptr++ = 0x8B;
+			asmand(ctxt, &pp.from, &p->to);
+			break;
 		}
 		break;
 	}

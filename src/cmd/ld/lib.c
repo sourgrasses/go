@@ -290,7 +290,7 @@ loadlib(void)
 	// binaries, so leave it enabled on OS X (Mach-O) binaries.
 	// Also leave it enabled on Solaris which doesn't support
 	// statically linked binaries.
-	if(!flag_shared && !havedynamic && HEADTYPE != Hdarwin && HEADTYPE != Hsolaris)
+	if(!flag_shared && !havedynamic && HEADTYPE != Hdarwin && HEADTYPE != Hsolaris && HEADTYPE != Hhaiku)
 		debug['d'] = 1;
 	
 	importcycles();
@@ -624,7 +624,7 @@ hostlink(void)
 		argv[argc++] = smprint("-Wl,-rpath,%s", rpath);
 
 	// Force global symbols to be exported for dlopen, etc.
-	if(iself)
+	if(iself && HEADTYPE != Hhaiku)
 		argv[argc++] = "-rdynamic";
 
 	if(strstr(argv[0], "clang") != nil)

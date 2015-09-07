@@ -58,6 +58,7 @@ static char *okgoos[] = {
 	"android",
 	"solaris",
 	"freebsd",
+	"haiku",
 	"nacl",
 	"netbsd",
 	"openbsd",

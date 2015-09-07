@@ -678,6 +678,7 @@ asmb(void)
 	case Hopenbsd:
 	case Hdragonfly:
 	case Hsolaris:
+	case Hhaiku:
 		debug['8'] = 1;	/* 64-bit addresses */
 		break;
 	case Hnacl:
@@ -710,6 +711,7 @@ asmb(void)
 		case Hdragonfly:
 		case Hsolaris:
 		case Hnacl:
+		case Hhaiku:
 			symo = segdata.fileoff+segdata.filelen;
 			symo = rnd(symo, INITRND);
 			break;
@@ -792,6 +794,7 @@ asmb(void)
 	case Hdragonfly:
 	case Hsolaris:
 	case Hnacl:
+	case Hhaiku:
 		asmbelf(symo);
 		break;
 	case Hwindows:

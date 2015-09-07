@@ -695,6 +695,8 @@ main(int argc, char **argv)
 		gohostarch = "amd64";
 	if(contains(bstr(&b), "i386"))
 		gohostarch = "386";
+#elif defined(__HAIKU__)
+	gohostos = "haiku";
 #else
 	fatal("unknown operating system");
 #endif
