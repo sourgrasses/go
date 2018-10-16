@@ -256,7 +256,7 @@ func adddynrel(ctxt *ld.Link, s *sym.Symbol, r *sym.Reloc) bool {
 
 	case objabi.R_ADDR:
 		if s.Type == sym.STEXT && ctxt.IsELF {
-			if ctxt.HeadType == objabi.Hsolaris {
+			if ctxt.HeadType == objabi.Hsolaris || ctxt.HeadType == objabi.Hhaiku {
 				addpltsym(ctxt, targ)
 				r.Sym = ctxt.Syms.Lookup(".plt", 0)
 				r.Add += int64(targ.Plt)
@@ -723,6 +723,7 @@ func asmb(ctxt *ld.Link) {
 
 	case objabi.Hlinux,
 		objabi.Hfreebsd,
+		objabi.Hhaiku,
 		objabi.Hnetbsd,
 		objabi.Hopenbsd,
 		objabi.Hdragonfly,
@@ -753,6 +754,7 @@ func asmb(ctxt *ld.Link) {
 
 		case objabi.Hlinux,
 			objabi.Hfreebsd,
+			objabi.Hhaiku,
 			objabi.Hnetbsd,
 			objabi.Hopenbsd,
 			objabi.Hdragonfly,
@@ -833,6 +835,7 @@ func asmb(ctxt *ld.Link) {
 
 	case objabi.Hlinux,
 		objabi.Hfreebsd,
+		objabi.Hhaiku,
 		objabi.Hnetbsd,
 		objabi.Hopenbsd,
 		objabi.Hdragonfly,

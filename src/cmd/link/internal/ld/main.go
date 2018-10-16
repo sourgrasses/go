@@ -176,8 +176,10 @@ func Main(arch *sys.Arch, theArch Arch) {
 	ctxt.computeTLSOffset()
 	thearch.Archinit(ctxt)
 
-	if ctxt.linkShared && !ctxt.IsELF {
-		Exitf("-linkshared can only be used on elf systems")
+	if ctxt.HeadType != objabi.Hhaiku
+		if ctxt.linkShared && !ctxt.IsELF  {
+			Exitf("-linkshared can only be used on elf systems")
+		}
 	}
 
 	if ctxt.Debugvlog != 0 {

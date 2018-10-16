@@ -163,7 +163,7 @@ func relocsym(ctxt *Link, s *sym.Symbol) {
 
 		// We need to be able to reference dynimport symbols when linking against
 		// shared libraries, and Solaris and Darwin need it always
-		if ctxt.HeadType != objabi.Hsolaris && ctxt.HeadType != objabi.Hdarwin && r.Sym != nil && r.Sym.Type == sym.SDYNIMPORT && !ctxt.DynlinkingGo() && !r.Sym.Attr.SubSymbol() {
+		if ctxt.HeadType != objabi.Hsolaris && ctxt.HeadType != objabi.Hdarwin && ctxt.HeadType != objabi.Hhaiku && r.Sym != nil && r.Sym.Type == sym.SDYNIMPORT && !ctxt.DynlinkingGo() && !r.Sym.Attr.SubSymbol() {
 			if !(ctxt.Arch.Family == sys.PPC64 && ctxt.LinkMode == LinkExternal && r.Sym.Name == ".TOC.") {
 				Errorf(s, "unhandled relocation for %s (type %d (%s) rtype %d (%s))", r.Sym.Name, r.Sym.Type, r.Sym.Type, r.Type, sym.RelocName(ctxt.Arch, r.Type))
 			}
@@ -204,7 +204,7 @@ func relocsym(ctxt *Link, s *sym.Symbol) {
 		case objabi.R_TLS_LE:
 			isAndroidX86 := objabi.GOOS == "android" && (ctxt.Arch.InFamily(sys.AMD64, sys.I386))
 
-			if ctxt.LinkMode == LinkExternal && ctxt.IsELF && !isAndroidX86 {
+			if ctxt.LinkMode == LinkExternal && ctxt.IsELF && !isAndroidX86 && ctxt.HeadType != objabi.Hhaiku {
 				r.Done = false
 				if r.Sym == nil {
 					r.Sym = ctxt.Tlsg
@@ -237,7 +237,7 @@ func relocsym(ctxt *Link, s *sym.Symbol) {
 		case objabi.R_TLS_IE:
 			isAndroidX86 := objabi.GOOS == "android" && (ctxt.Arch.InFamily(sys.AMD64, sys.I386))
 
-			if ctxt.LinkMode == LinkExternal && ctxt.IsELF && !isAndroidX86 {
+			if ctxt.LinkMode == LinkExternal && ctxt.IsELF && !isAndroidX86 && ctxt.HeadType != objabi.Hhaiku{
 				r.Done = false
 				if r.Sym == nil {
 					r.Sym = ctxt.Tlsg
@@ -1337,7 +1337,7 @@ func (ctxt *Link) dodata() {
 
 	if len(data[sym.STLSBSS]) > 0 {
 		var sect *sym.Section
-		if ctxt.IsELF && (ctxt.LinkMode == LinkExternal || !*FlagD) {
+		if ctxt.IsELF && (ctxt.LinkMode == LinkExternal || !*FlagD && ctxt.HeadType != objabi.Hhaiku) {
 			sect = addsection(ctxt.Arch, &Segdata, ".tbss", 06)
 			sect.Align = int32(ctxt.Arch.PtrSize)
 			sect.Vaddr = 0
