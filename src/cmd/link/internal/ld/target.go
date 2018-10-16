@@ -172,6 +172,11 @@ func (t *Target) IsOpenbsd() bool {
 	return t.HeadType == objabi.Hopenbsd
 }
 
+func (t *Target) IsHaiku() bool {
+	t.mustSetHeadType()
+	return t.HeadType == objabi.Hhaiku
+}
+
 func (t *Target) mustSetHeadType() {
 	if t.HeadType == objabi.Hunknown {
 		panic("HeadType is not set")

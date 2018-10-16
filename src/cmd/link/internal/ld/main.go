@@ -228,8 +228,10 @@ func Main(arch *sys.Arch, theArch Arch) {
 	bench.Start("Archinit")
 	thearch.Archinit(ctxt)
 
-	if ctxt.linkShared && !ctxt.IsELF {
-		Exitf("-linkshared can only be used on elf systems")
+	if ctxt.HeadType != objabi.Hhaiku {
+		if ctxt.linkShared && !ctxt.IsELF  {
+			Exitf("-linkshared can only be used on elf systems")
+		}
 	}
 
 	if ctxt.Debugvlog != 0 {

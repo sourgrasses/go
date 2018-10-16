@@ -1304,8 +1304,10 @@ func (ctxt *Link) doelf() {
 	// generate .tbss section for dynamic internal linker or external
 	// linking, so that various binutils could correctly calculate
 	// PT_TLS size. See https://golang.org/issue/5200.
-	if !*FlagD || ctxt.IsExternal() {
-		shstrtab.Addstring(".tbss")
+	if ctxt.HeadType != objabi.Hhaiku {
+		if !*FlagD || ctxt.IsExternal() {
+			shstrtab.Addstring(".tbss")
+		}
 	}
 	if ctxt.IsNetbsd() {
 		shstrtab.Addstring(".note.netbsd.ident")
@@ -1775,6 +1777,9 @@ func asmbElf(ctxt *Link) {
 			case objabi.Hfreebsd:
 				interpreter = thearch.Freebsddynld
 
+			case objabi.Hhaiku:
+				interpreter = thearch.Haikudynld
+
 			case objabi.Hnetbsd:
 				interpreter = thearch.Netbsddynld
 
@@ -1994,18 +1999,20 @@ func asmbElf(ctxt *Link) {
 		/*
 		 * Thread-local storage segment (really just size).
 		 */
-		tlssize := uint64(0)
-		for _, sect := range Segdata.Sections {
-			if sect.Name == ".tbss" {
-				tlssize = sect.Length
+		if ctxt.HeadType != objabi.Hhaiku {
+			tlssize := uint64(0)
+			for _, sect := range Segdata.Sections {
+				if sect.Name == ".tbss" {
+					tlssize = sect.Length
+				}
 			}
-		}
-		if tlssize != 0 {
-			ph := newElfPhdr()
-			ph.Type = elf.PT_TLS
-			ph.Flags = elf.PF_R
-			ph.Memsz = tlssize
-			ph.Align = uint64(ctxt.Arch.RegSize)
+			if tlssize != 0 {
+				ph := newElfPhdr()
+				ph.Type = elf.PT_TLS
+				ph.Flags = elf.PF_R
+				ph.Memsz = tlssize
+				ph.Align = uint64(ctxt.Arch.RegSize)
+			}
 		}
 	}
 
