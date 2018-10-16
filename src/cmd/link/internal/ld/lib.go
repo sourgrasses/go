@@ -185,6 +185,7 @@ type Arch struct {
 	Linuxdynld     string
 	LinuxdynldMusl string
 	Freebsddynld   string
+	Haikudynld     string
 	Netbsddynld    string
 	Openbsddynld   string
 	Dragonflydynld string
