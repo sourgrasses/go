@@ -128,7 +128,7 @@ func (ctxt *Link) computeTLSOffset() {
 		case sys.AMD64:
 			ctxt.Tlsoffset = (64 - 2) * 8
 		}
-	}
+	
 		/*
 		 * OS X system constants - offset from 0(GS) to our TLS.
 		 */

@@ -98,6 +98,7 @@ type Arch struct {
 	Dwarfreglr       int
 	Linuxdynld       string
 	Freebsddynld     string
+	Haikudynld       string
 	Netbsddynld      string
 	Openbsddynld     string
 	Dragonflydynld   string
