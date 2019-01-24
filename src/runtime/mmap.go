@@ -4,6 +4,7 @@
 
 // +build !plan9
 // +build !solaris
+// +build !haiku
 // +build !windows
 // +build !nacl
 // +build !linux !amd64

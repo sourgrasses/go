@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build dragonfly freebsd nacl netbsd openbsd solaris
+// +build dragonfly freebsd haiku nacl netbsd openbsd solaris
 
 package runtime
 
@@ -23,7 +23,7 @@ func sysAlloc(n uintptr, sysStat *uint64) unsafe.Pointer {
 }
 
 func sysUnused(v unsafe.Pointer, n uintptr) {
-	madvise(v, n, _MADV_FREE)
+	//madvise(v, n, _MADV_FREE)
 }
 
 func sysUsed(v unsafe.Pointer, n uintptr) {
@@ -50,7 +50,7 @@ func sysReserve(v unsafe.Pointer, n uintptr) unsafe.Pointer {
 }
 
 const _sunosEAGAIN = 11
-const _ENOMEM = 12
+// const _ENOMEM = 12
 
 func sysMap(v unsafe.Pointer, n uintptr, sysStat *uint64) {
 	mSysStatInc(sysStat, n)

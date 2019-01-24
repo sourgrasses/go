@@ -160,7 +160,10 @@ needtls:
 	// skip TLS setup on Darwin
 	JMP ok
 #endif
-
+#ifdef GOOS_haiku
+	// skip TLS setup on Haiku
+	JMP ok
+#endif
 	LEAQ	runtime·m0+m_tls(SB), DI
 	CALL	runtime·settls(SB)
 
