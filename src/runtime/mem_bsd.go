@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build dragonfly || freebsd || netbsd || openbsd || solaris
+//go:build dragonfly || freebsd || haiku || netbsd || openbsd || solaris
 
 package runtime
 
@@ -23,11 +23,11 @@ func sysAllocOS(n uintptr) unsafe.Pointer {
 }
 
 func sysUnusedOS(v unsafe.Pointer, n uintptr) {
-	if debug.madvdontneed != 0 {
-		madvise(v, n, _MADV_DONTNEED)
-	} else {
-		madvise(v, n, _MADV_FREE)
-	}
+	// if debug.madvdontneed != 0 {
+	// 	madvise(v, n, _MADV_DONTNEED)
+	// } else {
+	// 	madvise(v, n, _MADV_FREE)
+	// }
 }
 
 func sysUsedOS(v unsafe.Pointer, n uintptr) {
@@ -67,7 +67,8 @@ func sysReserveOS(v unsafe.Pointer, n uintptr) unsafe.Pointer {
 }
 
 const _sunosEAGAIN = 11
-const _ENOMEM = 12
+
+// const _ENOMEM = 12
 
 func sysMapOS(v unsafe.Pointer, n uintptr) {
 	p, err := mmap(v, n, _PROT_READ|_PROT_WRITE, _MAP_ANON|_MAP_FIXED|_MAP_PRIVATE, -1, 0)
