@@ -1096,6 +1096,12 @@ func (ctxt *Link) hostlink() {
 		}
 	case objabi.Hopenbsd:
 		argv = append(argv, "-Wl,-nopie")
+	case objabi.Hhaiku:
+		argv = append(argv, "-lbsd")
+		argv = append(argv, "-lroot")
+		// argv = append(argv, "-lsocket")
+		// argv = append(argv, "-lnetwork")
+		argv = append(argv, "-fPIC")
 	case objabi.Hwindows:
 		if windowsgui {
 			argv = append(argv, "-mwindows")
