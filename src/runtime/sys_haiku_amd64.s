@@ -340,8 +340,8 @@ TEXT runtime·osyield1(SB),NOSPLIT,$0
 	CALL	AX
 	RET
 
-// func now() (sec int64, nsec int32)
-TEXT time·now(SB),NOSPLIT,$8-12
+// func walltime() (sec int64, nsec int32)
+TEXT runtime·walltime(SB),NOSPLIT,$8-12
 	CALL	runtime·nanotime(SB)
 	MOVQ	0(SP), AX
 
@@ -359,3 +359,4 @@ TEXT time·now(SB),NOSPLIT,$8-12
 	SUBQ	DX, CX
 	MOVL	CX, nsec+8(FP)
 	RET
+
