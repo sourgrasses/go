@@ -29,6 +29,8 @@ package cgo
 
 #cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
 
+#cgo haiku LDFLAGS: -lroot -lbsd
+
 */
 import "C"
 

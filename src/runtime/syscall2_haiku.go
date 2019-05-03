@@ -20,7 +20,7 @@ import _ "unsafe" // for go:linkname
 //go:cgo_import_dynamic libc_setsid setsid "libroot.so"
 //go:cgo_import_dynamic libc_setuid setuid "libroot.so"
 //go:cgo_import_dynamic libc_setpgid setpgid "libroot.so"
-//go:cgo_import_dynamic libc_syscall syscall "libroot.so"
+//go:cgo_import_dynamic libc__kern_generic_syscall _kern_generic_syscall "libroot.so"
 //go:cgo_import_dynamic libc_forkx forkx "libroot.so"
 //go:cgo_import_dynamic libc_wait4 wait4 "libroot.so"
 
@@ -38,6 +38,6 @@ import _ "unsafe" // for go:linkname
 //go:linkname libc_setsid libc_setsid
 //go:linkname libc_setuid libc_setuid
 //go:linkname libc_setpgid libc_setpgid
-//go:linkname libc_syscall libc_syscall
+//go:linkname libc__kern_generic_syscall libc__kern_generic_syscall
 //go:linkname libc_fork libc_fork
 //go:linkname libc_wait4 libc_wait4
