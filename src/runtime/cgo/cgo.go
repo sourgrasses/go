@@ -26,9 +26,9 @@ package cgo
 // Issue 35247.
 #cgo darwin CFLAGS: -Wno-nullability-completeness
 
-#cgo CFLAGS: -Wall -Werror
-
 #cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
+
+#cgo haiku LDFLAGS: -lroot -lbsd
 
 */
 import "C"

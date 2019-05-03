@@ -561,14 +561,18 @@ func (ctxt *Link) loadlib() {
 		// The startup code uses an import of runtime/cgo to decide
 		// whether to initialize the TLS.  So give it one. This could
 		// be handled differently but it's an unusual case.
-		if lib := loadinternal(ctxt, "runtime/cgo"); lib != nil && lib.Shlib == "" {
-			if ctxt.BuildMode == BuildModeShared || ctxt.linkShared {
-				Exitf("cannot implicitly include runtime/cgo in a shared library")
-			}
-			for ; i < len(ctxt.Library); i++ {
-				lib := ctxt.Library[i]
-				if lib.Shlib == "" {
-					loadobjfile(ctxt, lib)
+		if ctxt.HeadType == objabi.Hhaiku {
+
+		} else {
+			if lib := loadinternal(ctxt, "runtime/cgo"); lib != nil && lib.Shlib == "" {
+				if ctxt.BuildMode == BuildModeShared || ctxt.linkShared {
+					Exitf("cannot implicitly include runtime/cgo in a shared library")
+				}
+				for ; i < len(ctxt.Library); i++ {
+					lib := ctxt.Library[i]
+					if lib.Shlib == "" {
+						loadobjfile(ctxt, lib)
+					}
 				}
 			}
 		}
@@ -715,7 +719,7 @@ func (ctxt *Link) linksetup() {
 	// Also leave it enabled on Solaris which doesn't support
 	// statically linked binaries.
 	if ctxt.BuildMode == BuildModeExe {
-		if havedynamic == 0 && ctxt.HeadType != objabi.Hdarwin && ctxt.HeadType != objabi.Hsolaris {
+		if havedynamic == 0 && ctxt.HeadType != objabi.Hdarwin && ctxt.HeadType != objabi.Hsolaris && ctxt.HeadType != objabi.Hhaiku {
 			*FlagD = true
 		}
 	}
@@ -1282,7 +1286,7 @@ func (ctxt *Link) hostlink() {
 		argv = append(argv, "-lbsd")
 		argv = append(argv, "-lroot")
 		// argv = append(argv, "-lsocket")
-		// argv = append(argv, "-lnetwork")
+		argv = append(argv, "-lnetwork")
 		argv = append(argv, "-fPIC")
 	case objabi.Hopenbsd:
 		argv = append(argv, "-Wl,-nopie")
@@ -1472,7 +1476,7 @@ func (ctxt *Link) hostlink() {
 
 	// Force global symbols to be exported for dlopen, etc.
 	if ctxt.IsELF {
-		argv = append(argv, "-rdynamic")
+		//	argv = append(argv, "-rdynamic")
 	}
 	if ctxt.HeadType == objabi.Haix {
 		fileName := xcoffCreateExportFile(ctxt)
