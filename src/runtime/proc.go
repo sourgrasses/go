@@ -1574,7 +1574,7 @@ func allocm(_p_ *p, fn func()) *m {
 
 	// In case of cgo or Solaris or Darwin, pthread_create will make us a stack.
 	// Windows and Plan 9 will layout sched stack on OS stack.
-	if iscgo || GOOS == "solaris" || GOOS == "windows" || GOOS == "plan9" || GOOS == "darwin" {
+	if iscgo || GOOS == "solaris" || GOOS == "haiku" || GOOS == "windows" || GOOS == "plan9" || GOOS == "darwin" {
 		mp.g0 = malg(-1)
 	} else {
 		mp.g0 = malg(8192 * sys.StackGuardMultiplier)

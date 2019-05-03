@@ -1445,11 +1445,11 @@ func (ctxt *Link) doelf() {
 	// generate .tbss section for dynamic internal linker or external
 	// linking, so that various binutils could correctly calculate
 	// PT_TLS size. See https://golang.org/issue/5200.
-	if ctxt.HeadType != objabi.Hhaiku {
+	// if ctxt.HeadType != objabi.Hhaiku {
 		if !*FlagD || ctxt.LinkMode == LinkExternal {
 			Addstring(shstrtab, ".tbss")
 		}
-	}
+	// }
 	if ctxt.HeadType == objabi.Hnetbsd {
 		Addstring(shstrtab, ".note.netbsd.ident")
 	}

@@ -21,7 +21,7 @@ var (
 	libc_setsid,
 	libc_setuid,
 	libc_setpgid,
-	libc_syscall,
+	libc__kern_generic_syscall,
 	libc_wait4,
 	pipe1 libcFunc
 )
@@ -245,7 +245,7 @@ func syscall_setpgid(pid, pgid uintptr) (err uintptr) {
 
 func syscall_syscall(trap, a1, a2, a3 uintptr) (r1, r2, err uintptr) {
 	call := libcall{
-		fn:   uintptr(unsafe.Pointer(&libc_syscall)),
+		fn:   uintptr(unsafe.Pointer(&libc__kern_generic_syscall)),
 		n:    4,
 		args: uintptr(unsafe.Pointer(&trap)),
 	}

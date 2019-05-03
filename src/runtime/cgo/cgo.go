@@ -21,9 +21,9 @@ package cgo
 #cgo netbsd LDFLAGS: -lpthread
 #cgo openbsd LDFLAGS: -lpthread
 
-#cgo CFLAGS: -Wall -Werror
-
 #cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
+
+#cgo haiku LDFLAGS: -lroot -lbsd
 
 */
 import "C"
