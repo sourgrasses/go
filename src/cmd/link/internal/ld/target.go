@@ -194,7 +194,7 @@ func (t *Target) IsBigEndian() bool {
 func (t *Target) UsesLibc() bool {
 	t.mustSetHeadType()
 	switch t.HeadType {
-	case objabi.Haix, objabi.Hdarwin, objabi.Hopenbsd, objabi.Hsolaris, objabi.Hwindows:
+	case objabi.Haix, objabi.Hdarwin, objabi.Hhaiku, objabi.Hopenbsd, objabi.Hsolaris, objabi.Hwindows:
 		// platforms where we use libc for syscalls.
 		return true
 	}
