@@ -29,14 +29,14 @@ TEXT runtime·miniterrno(SB),NOSPLIT,$0
 	MOVQ	AX,	(m_mOS+mOS_perrno)(BX)
 	RET
 
-// int64 runtime·nanotime1(void);
+// int64 runtime·nanotime2(void);
 //
 // clock_gettime(3c) wrapper because Timespec is too large for
 // runtime·nanotime stack.
 //
 // Called using runtime·sysvicall6 from os_solaris.c:/nanotime.
 // NOT USING GO CALLING CONVENTION.
-TEXT runtime·nanotime1(SB),NOSPLIT,$0
+TEXT runtime·nanotime2(SB),NOSPLIT,$0
 	// need space for the timespec argument.
 	SUBQ	$64, SP	// 16 bytes will do, but who knows in the future?
 	MOVQ	$3, DI	// CLOCK_REALTIME from <sys/time_impl.h>
@@ -338,24 +338,5 @@ TEXT runtime·usleep2(SB),NOSPLIT,$0
 TEXT runtime·osyield1(SB),NOSPLIT,$0
 	LEAQ	libc_sched_yield(SB), AX
 	CALL	AX
-	RET
-
-// func walltime() (sec int64, nsec int32)
-TEXT runtime·walltime(SB),NOSPLIT,$8-12	CALL	runtime·nanotime(SB)
-	MOVQ	0(SP), AX
-
-	// generated code for
-	//	func f(x uint64) (uint64, uint64) { return x/1000000000, x%100000000 }
-	// adapted to reduce duplication
-	MOVQ	AX, CX
-	MOVQ	$1360296554856532783, AX
-	MULQ	CX
-	ADDQ	CX, DX
-	RCRQ	$1, DX
-	SHRQ	$29, DX
-	MOVQ	DX, sec+0(FP)
-	IMULQ	$1000000000, DX
-	SUBQ	DX, CX
-	MOVL	CX, nsec+8(FP)
 	RET
 

@@ -242,8 +242,8 @@ type itimerval struct {
 	it_value    timeval
 }
 
-type pthread *[0]byte
-type pthreadattr *[0]byte
+type pthread uintptr
+type pthreadattr uintptr
 
 func (ts *timespec) set_sec(x int64) {
 	ts.tv_sec = x
