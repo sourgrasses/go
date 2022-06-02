@@ -2470,6 +2470,7 @@ func instinit(ctxt *obj.Link) {
 }
 
 var isAndroid = buildcfg.GOOS == "android"
+var isHaiku = buildcfg.GOOS == "haiku"
 
 func prefixof(ctxt *obj.Link, a *obj.Addr) int {
 	if a.Reg < REG_CS && a.Index < REG_CS { // fast path
@@ -3719,7 +3720,7 @@ func (ab *AsmBuf) asmandsz(ctxt *obj.Link, cursym *obj.LSym, p *obj.Prog, a *obj
 	}
 
 	if REG_AX <= base && base <= REG_R15 {
-		if a.Index == REG_TLS && !ctxt.Flag_shared && !isAndroid {
+		if a.Index == REG_TLS && !ctxt.Flag_shared && !isAndroid && !isHaiku {
 			rel = obj.Reloc{}
 			rel.Type = objabi.R_TLS_LE
 			rel.Siz = 4
