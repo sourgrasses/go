@@ -39,7 +39,7 @@ TEXT runtime·miniterrno(SB),NOSPLIT,$0
 TEXT runtime·nanotime2(SB),NOSPLIT,$0
 	// need space for the timespec argument.
 	SUBQ	$64, SP	// 16 bytes will do, but who knows in the future?
-	MOVQ	$3, DI	// CLOCK_REALTIME from <sys/time_impl.h>
+	MOVQ	$-1, DI	// CLOCK_REALTIME from <time.h>
 	MOVQ	SP, SI
 	LEAQ	libc_clock_gettime(SB), AX
 	CALL	AX
@@ -49,19 +49,17 @@ TEXT runtime·nanotime2(SB),NOSPLIT,$0
 	ADDQ	$64, SP
 	RET
 
-/*
 // pipe(3c) wrapper that returns fds in AX, DX.
 // NOT USING GO CALLING CONVENTION.
 TEXT runtime·pipe1(SB),NOSPLIT,$0
-	SUBQ	$16, SP // 8 bytes will do, but stack has to be 16-byte alligned
+	SUBQ	$16, SP // 8 bytes will do, but stack has to be 16-byte aligned
 	MOVQ	SP, DI
-	MOVQ	libc·pipe(SB), AX
+	LEAQ	libc_pipe(SB), AX
 	CALL	AX
 	MOVL	0(SP), AX
 	MOVL	4(SP), DX
 	ADDQ	$16, SP
 	RET
-*/
 
 // Call a library function with SysV calling conventions.
 // The called function can take a maximum of 6 INTEGER class arguments,

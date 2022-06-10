@@ -32,7 +32,7 @@ TEXT ·chroot1(SB),NOSPLIT,$0
 TEXT ·close(SB),NOSPLIT,$0
 	JMP	runtime·syscall_close(SB)
 
-TEXT ·dup2(SB),NOSPLIT,$0
+TEXT ·dup2child(SB),NOSPLIT,$0
 	JMP	runtime·syscall_dup2(SB)
 
 TEXT ·execve(SB),NOSPLIT,$0

@@ -18,6 +18,17 @@ import "unsafe"
 func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
 func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
 
+// Constant expected by package but not supported
+const (
+	_ = iota
+	TIOCNOTTY
+)
+
+const (
+	_F_DUP2FD_CLOEXEC = 0
+)
+
+
 /*type SockaddrDatalink struct {
 	Family uint16
 	Index  uint16
@@ -57,7 +68,9 @@ func Pipe(p []int) (err error) {
 	if e1 != 0 {
 		err = Errno(e1)
 	}
-	p[0], p[1] = int(r0), int(w0)
+	if err == nil {
+		p[0], p[1] = int(r0), int(w0)
+	}
 	return
 }
 
@@ -178,57 +191,58 @@ func Setgroups(gids []int) (err error) {
 func ReadDirent(fd int, buf []byte) (n int, err error) {
 	// Final argument is (basep *uintptr) and the syscall doesn't take nil.
 	// TODO(rsc): Can we use a single global basep for all calls?
-	// return Getdents(fd, buf, new(uintptr))
-	panic("Not implemented")
+	var base = (*uintptr)(unsafe.Pointer(new(uint64)))
+	return Getdirentries(fd, buf, base)
 }
 
-// Wait status is 7 bits at bottom, either 0 (exited),
-// 0x7F (stopped), or a signal number that caused an exit.
-// The 0x80 bit is whether there was a core dump.
-// An extra number (exit code, signal causing a stop)
-// is in the high bits.
+// Wait status: 8 bits at the bottom is exit status
+// If all bits other than the 8 bottom are empty, then exited
+// next 8 bits are signal number that caused exit
+// next 8 bits are signal that caused stop
+// core is 0x10000
+// continued is 0x20000
 
 type WaitStatus uint32
 
 const (
-	mask  = 0x7F
-	core  = 0x80
+	mask  = 0xFF
+	core  = 0x10000
+	continued = 0x20000
 	shift = 8
 
 	exited  = 0
-	stopped = 0x7F
 )
 
-func (w WaitStatus) Exited() bool { return w&mask == exited }
+func (w WaitStatus) Exited() bool { return w&^mask == exited }
 
 func (w WaitStatus) ExitStatus() int {
-	if w&mask != exited {
+	if w&^mask != exited {
 		return -1
 	}
-	return int(w >> shift)
+	return int(w&mask)
 }
 
-func (w WaitStatus) Signaled() bool { return w&mask != stopped && w&mask != 0 }
+func (w WaitStatus) Signaled() bool { return ((w >> 8)&mask) != 0 }
 
 func (w WaitStatus) Signal() Signal {
-	sig := Signal(w & mask)
-	if sig == stopped || sig == 0 {
+	sig := Signal((w >> 8) & mask)
+	if sig == 0 {
 		return -1
 	}
 	return sig
 }
 
-func (w WaitStatus) CoreDump() bool { return w.Signaled() && w&core != 0 }
+func (w WaitStatus) CoreDump() bool { return w&core != 0 }
 
-func (w WaitStatus) Stopped() bool { return w&mask == stopped && Signal(w>>shift) != SIGSTOP }
+func (w WaitStatus) Stopped() bool { return (w >> 16)&mask != 0 }
 
-func (w WaitStatus) Continued() bool { return w&mask == stopped && Signal(w>>shift) == SIGSTOP }
+func (w WaitStatus) Continued() bool { return w&continued != 0}
 
 func (w WaitStatus) StopSignal() Signal {
 	if !w.Stopped() {
 		return -1
 	}
-	return Signal(w>>shift) & 0xFF
+	return Signal(w>>16)&mask
 }
 
 func (w WaitStatus) TrapCause() int { return -1 }
@@ -403,14 +417,15 @@ func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags i
 //sys	Chown(path string, uid int, gid int) (err error)
 //sys	Chroot(path string) (err error)
 //sys	Close(fd int) (err error)
+//sys	Closedir(dir uintptr) (err error)
 //sys	Dup(fd int) (nfd int, err error)
 //sys	Exit(code int)
 //sys	Fchdir(fd int) (err error)
 //sys	Fchmod(fd int, mode uint32) (err error)
 //sys	Fchown(fd int, uid int, gid int) (err error)
+//sys	Fdopendir(fd int) (dir uintptr, err error)
 //sys	Fpathconf(fd int, name int) (val int, err error)
 //sys	Fstat(fd int, stat *Stat_t) (err error)
-//sys	Getdents(fd int, buf []byte, basep *uintptr) (n int, err error)
 //sysnb	Getgid() (gid int)
 //sysnb	Getpid() (pid int)
 //sys	Geteuid() (euid int)
@@ -429,10 +444,12 @@ func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags i
 //sys	Mknod(path string, mode uint32, dev int) (err error)
 //sys	Nanosleep(time *Timespec, leftover *Timespec) (err error)
 //sys	Open(path string, mode int, perm uint32) (fd int, err error)
+//sys	Openat(fd int, path string, flags int, perm uint32) (fdret int, err error)
 //sys	Pathconf(path string, name int) (val int, err error)
 //sys	Pread(fd int, p []byte, offset int64) (n int, err error)
 //sys	Pwrite(fd int, p []byte, offset int64) (n int, err error)
 //sys	read(fd int, p []byte) (n int, err error)
+//sys	Readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res Errno)
 //sys	Readlink(path string, buf []byte) (n int, err error)
 //sys	Rename(from string, to string) (err error)
 //sys	Rmdir(path string) (err error)
@@ -489,3 +506,79 @@ func writelen(fd int, buf *byte, nbuf int) (n int, err error) {
 	}
 	return
 }
+
+func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
+	// Simulate Getdirentries using fdopendir/readdir_r/closedir.
+	// We store the number of entries to skip in the seek
+	// offset of fd. See issue #31368.
+	// It's not the full required semantics, but should handle the case
+	// of calling Getdirentries or ReadDirent repeatedly.
+	// It won't handle assigning the results of lseek to *basep, or handle
+	// the directory being edited underfoot.
+	skip, err := Seek(fd, 0, 1 /* SEEK_CUR */)
+	if err != nil {
+		return 0, err
+	}
+
+	// We need to duplicate the incoming file descriptor
+	// because the caller expects to retain control of it, but
+	// fdopendir expects to take control of its argument.
+	// Just Dup'ing the file descriptor is not enough, as the
+	// result shares underlying state. Use openat to make a really
+	// new file descriptor referring to the same directory.
+	fd2, err := Openat(fd, ".", O_RDONLY, 0)
+	if err != nil {
+		return 0, err
+	}
+	d, err := Fdopendir(fd2)
+	if err != nil {
+		Close(fd2)
+		return 0, err
+	}
+	defer Closedir(d)
+
+	var cnt int64
+	for {
+		var entry Dirent
+		var entryp *Dirent
+		e := Readdir_r(d, &entry, &entryp)
+		if e != 0 {
+			return n, errnoErr(e)
+		}
+		if entryp == nil {
+			break
+		}
+		if skip > 0 {
+			skip--
+			cnt++
+			continue
+		}
+		reclen := int(entry.Reclen)
+		if reclen > len(buf) {
+			// Not enough room. Return for now.
+			// The counter will let us know where we should start up again.
+			// Note: this strategy for suspending in the middle and
+			// restarting is O(n^2) in the length of the directory. Oh well.
+			break
+		}
+		// Copy entry into return buffer.
+		s := struct {
+			ptr unsafe.Pointer
+			siz int
+			cap int
+		}{ptr: unsafe.Pointer(&entry), siz: reclen, cap: reclen}
+		copy(buf, *(*[]byte)(unsafe.Pointer(&s)))
+		buf = buf[reclen:]
+		n += reclen
+		cnt++
+	}
+	// Set the seek offset of the input fd to record
+	// how many files we've already returned.
+	_, err = Seek(fd, cnt, 0 /* SEEK_SET */)
+	if err != nil {
+		return n, err
+	}
+
+	return n, nil
+}
+

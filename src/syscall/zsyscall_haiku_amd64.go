@@ -19,14 +19,16 @@ import "unsafe"
 //go:cgo_import_dynamic libc_Chown chown "libroot.so"
 //go:cgo_import_dynamic libc_Chroot chroot "libroot.so"
 //go:cgo_import_dynamic libc_Close close "libroot.so"
+//go:cgo_import_dynamic libc_Closedir closedir "libroot.so"
 //go:cgo_import_dynamic libc_Dup dup "libroot.so"
+//go:cgo_import_dynamic libc_Dup2 dup2 "libroot.so"
 //go:cgo_import_dynamic libc_Exit exit "libroot.so"
 //go:cgo_import_dynamic libc_Fchdir fchdir "libroot.so"
 //go:cgo_import_dynamic libc_Fchmod fchmod "libroot.so"
 //go:cgo_import_dynamic libc_Fchown fchown "libroot.so"
+//go:cgo_import_dynamic libc_Fdopendir fdopendir "libroot.so"
 //go:cgo_import_dynamic libc_Fpathconf fpathconf "libroot.so"
 //go:cgo_import_dynamic libc_Fstat fstat "libroot.so"
-//go:cgo_import_dynamic libc_Getdents getdents "libroot.so"
 //go:cgo_import_dynamic libc_Getgid getgid "libroot.so"
 //go:cgo_import_dynamic libc_Getpid getpid "libroot.so"
 //go:cgo_import_dynamic libc_Geteuid geteuid "libroot.so"
@@ -45,10 +47,12 @@ import "unsafe"
 //go:cgo_import_dynamic libc_Mknod mknod "libroot.so"
 //go:cgo_import_dynamic libc_Nanosleep nanosleep "libroot.so"
 //go:cgo_import_dynamic libc_Open open "libroot.so"
+//go:cgo_import_dynamic libc_Openat openat "libroot.so"
 //go:cgo_import_dynamic libc_Pathconf pathconf "libroot.so"
 //go:cgo_import_dynamic libc_Pread pread "libroot.so"
 //go:cgo_import_dynamic libc_Pwrite pwrite "libroot.so"
 //go:cgo_import_dynamic libc_read read "libroot.so"
+//go:cgo_import_dynamic libc_Readdir_r readdir_r "libroot.so"
 //go:cgo_import_dynamic libc_Readlink readlink "libroot.so"
 //go:cgo_import_dynamic libc_Rename rename "libroot.so"
 //go:cgo_import_dynamic libc_Rmdir rmdir "libroot.so"
@@ -100,14 +104,16 @@ import "unsafe"
 //go:linkname libc_Chown libc_Chown
 //go:linkname libc_Chroot libc_Chroot
 //go:linkname libc_Close libc_Close
+//go:linkname libc_Closedir libc_Closedir
 //go:linkname libc_Dup libc_Dup
+//go:linkname libc_Dup2 libc_Dup2
 //go:linkname libc_Exit libc_Exit
 //go:linkname libc_Fchdir libc_Fchdir
 //go:linkname libc_Fchmod libc_Fchmod
 //go:linkname libc_Fchown libc_Fchown
+//go:linkname libc_Fdopendir libc_Fdopendir
 //go:linkname libc_Fpathconf libc_Fpathconf
 //go:linkname libc_Fstat libc_Fstat
-//go:linkname libc_Getdents libc_Getdents
 //go:linkname libc_Getgid libc_Getgid
 //go:linkname libc_Getpid libc_Getpid
 //go:linkname libc_Geteuid libc_Geteuid
@@ -126,10 +132,12 @@ import "unsafe"
 //go:linkname libc_Mknod libc_Mknod
 //go:linkname libc_Nanosleep libc_Nanosleep
 //go:linkname libc_Open libc_Open
+//go:linkname libc_Openat libc_Openat
 //go:linkname libc_Pathconf libc_Pathconf
 //go:linkname libc_Pread libc_Pread
 //go:linkname libc_Pwrite libc_Pwrite
 //go:linkname libc_read libc_read
+//go:linkname libc_Readdir_r libc_Readdir_r
 //go:linkname libc_Readlink libc_Readlink
 //go:linkname libc_Rename libc_Rename
 //go:linkname libc_Rmdir libc_Rmdir
@@ -184,14 +192,16 @@ var (
 	libc_Chown,
 	libc_Chroot,
 	libc_Close,
+	libc_Closedir,
 	libc_Dup,
+	libc_Dup2,
 	libc_Exit,
 	libc_Fchdir,
 	libc_Fchmod,
 	libc_Fchown,
+	libc_Fdopendir,
 	libc_Fpathconf,
 	libc_Fstat,
-	libc_Getdents,
 	libc_Getgid,
 	libc_Getpid,
 	libc_Geteuid,
@@ -210,10 +220,12 @@ var (
 	libc_Mknod,
 	libc_Nanosleep,
 	libc_Open,
+	libc_Openat,
 	libc_Pathconf,
 	libc_Pread,
 	libc_Pwrite,
 	libc_read,
+	libc_Readdir_r,
 	libc_Readlink,
 	libc_Rename,
 	libc_Rmdir,
@@ -379,8 +391,25 @@ func Close(fd int) (err error) {
 	return
 }
 
+func Closedir(dir uintptr) (err error) {
+	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Closedir)), 1, uintptr(dir), 0, 0, 0, 0, 0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func Dup(fd int) (nfd int, err error) {
 	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Dup)), 1, uintptr(fd), 0, 0, 0, 0, 0)
+	nfd = int(r0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func Dup2(from int, to int) (nfd int, err error) {
+	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Dup2)), 2, uintptr(from), uintptr(to), 0, 0, 0, 0)
 	nfd = int(r0)
 	if e1 != 0 {
 		err = errnoErr(e1)
@@ -412,6 +441,15 @@ func Fchown(fd int, uid int, gid int) (err error) {
 	return
 }
 
+func Fdopendir(fd int) (dir uintptr, err error) {
+	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Fdopendir)), 1, uintptr(fd), 0, 0, 0, 0, 0)
+	dir = uintptr(r0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func Fpathconf(fd int, name int) (val int, err error) {
 	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Fpathconf)), 2, uintptr(fd), uintptr(name), 0, 0, 0, 0)
 	val = int(r0)
@@ -423,19 +461,6 @@ func Fpathconf(fd int, name int) (val int, err error) {
 
 func Fstat(fd int, stat *Stat_t) (err error) {
 	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Fstat)), 2, uintptr(fd), uintptr(unsafe.Pointer(stat)), 0, 0, 0, 0)
-	if e1 != 0 {
-		err = errnoErr(e1)
-	}
-	return
-}
-
-func Getdents(fd int, buf []byte, basep *uintptr) (n int, err error) {
-	var _p0 *byte
-	if len(buf) > 0 {
-		_p0 = &buf[0]
-	}
-	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Getdents)), 4, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(len(buf)), uintptr(unsafe.Pointer(basep)), 0, 0)
-	n = int(r0)
 	if e1 != 0 {
 		err = errnoErr(e1)
 	}
@@ -611,6 +636,20 @@ func Open(path string, mode int, perm uint32) (fd int, err error) {
 	return
 }
 
+func Openat(fd int, path string, flags int, perm uint32) (fdret int, err error) {
+	var _p0 *byte
+	_p0, err = BytePtrFromString(path)
+	if err != nil {
+		return
+	}
+	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&libc_Openat)), 4, uintptr(fd), uintptr(unsafe.Pointer(_p0)), uintptr(flags), uintptr(perm), 0, 0)
+	fdret = int(r0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func Pathconf(path string, name int) (val int, err error) {
 	var _p0 *byte
 	_p0, err = BytePtrFromString(path)
@@ -661,6 +700,12 @@ func read(fd int, p []byte) (n int, err error) {
 	if e1 != 0 {
 		err = errnoErr(e1)
 	}
+	return
+}
+
+func Readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res Errno) {
+	r0, _, _ := sysvicall6(uintptr(unsafe.Pointer(&libc_Readdir_r)), 3, uintptr(dir), uintptr(unsafe.Pointer(entry)), uintptr(unsafe.Pointer(result)), 0, 0, 0)
+	res = Errno(r0)
 	return
 }
 
