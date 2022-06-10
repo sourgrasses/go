@@ -22,13 +22,13 @@ package cgo
 #cgo aix LDFLAGS: -Wl,-berok
 #cgo solaris LDFLAGS: -lxnet
 #cgo illumos LDFLAGS: -lsocket
+#cgo haiku LDFLAGS: -lroot -lbsd -lnetwork
 
 // Issue 35247.
 #cgo darwin CFLAGS: -Wno-nullability-completeness
 
 #cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
 
-#cgo haiku LDFLAGS: -lroot -lbsd
 
 */
 import "C"

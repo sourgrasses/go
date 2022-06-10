@@ -228,10 +228,6 @@ func Main(arch *sys.Arch, theArch Arch) {
 	bench.Start("Archinit")
 	thearch.Archinit(ctxt)
 
-	if ctxt.HeadType == objabi.Hhaiku {
-		ctxt.LinkMode = LinkExternal
-	}
-
 	if ctxt.linkShared && !ctxt.IsELF {
 		Exitf("-linkshared can only be used on elf systems")
 	}

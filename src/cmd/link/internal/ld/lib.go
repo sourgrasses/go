@@ -561,18 +561,14 @@ func (ctxt *Link) loadlib() {
 		// The startup code uses an import of runtime/cgo to decide
 		// whether to initialize the TLS.  So give it one. This could
 		// be handled differently but it's an unusual case.
-		if ctxt.HeadType == objabi.Hhaiku {
-
-		} else {
-			if lib := loadinternal(ctxt, "runtime/cgo"); lib != nil && lib.Shlib == "" {
-				if ctxt.BuildMode == BuildModeShared || ctxt.linkShared {
-					Exitf("cannot implicitly include runtime/cgo in a shared library")
-				}
-				for ; i < len(ctxt.Library); i++ {
-					lib := ctxt.Library[i]
-					if lib.Shlib == "" {
-						loadobjfile(ctxt, lib)
-					}
+		if lib := loadinternal(ctxt, "runtime/cgo"); lib != nil && lib.Shlib == "" {
+			if ctxt.BuildMode == BuildModeShared || ctxt.linkShared {
+				Exitf("cannot implicitly include runtime/cgo in a shared library")
+			}
+			for ; i < len(ctxt.Library); i++ {
+				lib := ctxt.Library[i]
+				if lib.Shlib == "" {
+					loadobjfile(ctxt, lib)
 				}
 			}
 		}
@@ -1283,10 +1279,10 @@ func (ctxt *Link) hostlink() {
 			argv = append(argv, "-Wl,-S") // suppress STAB (symbolic debugging) symbols
 		}
 	case objabi.Hhaiku:
-		argv = append(argv, "-lbsd")
-		argv = append(argv, "-lroot")
-		// argv = append(argv, "-lsocket")
+		//argv = append(argv, "-lbsd")
 		argv = append(argv, "-lnetwork")
+		argv = append(argv, "-lroot")
+		argv = append(argv, "-lgcc_s")
 		argv = append(argv, "-fPIC")
 	case objabi.Hopenbsd:
 		argv = append(argv, "-Wl,-nopie")

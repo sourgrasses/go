@@ -20,7 +20,7 @@ import (
 //go:cgo_import_dynamic libc__errnop _errnop "libroot.so"
 //go:cgo_import_dynamic libc_clock_gettime clock_gettime "libroot.so"
 //go:cgo_import_dynamic libc_exit exit "libroot.so"
-//go:cgo_import_dynamic libc_fstat fstat "libroot.so"
+//go:cgo_import_dynamic libc_fstat fstat#LIBROOT_1_ALPHA1 "libroot.so"
 //go:cgo_import_dynamic libc_getcontext getcontext "libroot.so"
 //go:cgo_import_dynamic libc_kill kill "libroot.so"
 //go:cgo_import_dynamic libc_getrlimit getrlimit "libroot.so"
@@ -45,10 +45,10 @@ import (
 //go:cgo_import_dynamic libc_sem_timedwait sem_timedwait "libroot.so"
 //go:cgo_import_dynamic libc_sem_wait sem_wait "libroot.so"
 //go:cgo_import_dynamic libc_setitimer setitimer "libroot.so"
-//go:cgo_import_dynamic libc_sigaction sigaction "libroot.so"
+//go:cgo_import_dynamic libc_sigaction sigaction#LIBROOT_1_ALPHA4 "libroot.so"
 //go:cgo_import_dynamic libc_sigaltstack sigaltstack "libroot.so"
-//go:cgo_import_dynamic libc_sigprocmask sigprocmask "libroot.so"
-//go:cgo_import_dynamic libc_sysconf sysconf "libroot.so"
+//go:cgo_import_dynamic libc_sigprocmask sigprocmask#LIBROOT_1_ALPHA4 "libroot.so"
+//go:cgo_import_dynamic libc_sysconf sysconf#LIBROOT_1_ALPHA4 "libroot.so"
 //go:cgo_import_dynamic libc_usleep usleep "libroot.so"
 //go:cgo_import_dynamic libc_write write "libroot.so"
 //go:cgo_import_dynamic libc_area_for area_for "libroot.so"
@@ -138,8 +138,19 @@ func getncpu() int32 {
 	return n
 }
 
+func getPageSize() uintptr {
+	n := int32(sysconf(__SC_PAGESIZE))
+	if n <= 0 {
+		return 0
+	}
+	return uintptr(n)
+}
+
 func osinit() {
 	ncpu = getncpu()
+	if physPageSize == 0 {
+		physPageSize = getPageSize()
+	}
 }
 
 func tstart_sysvicall()
@@ -152,21 +163,12 @@ func newosproc(mp *m) {
 		oset sigset
 		tid  pthread
 		ret  int32
-		size uint64
 	)
 
 	if pthread_attr_init(&attr) != 0 {
 		throw("pthread_attr_init")
 	}
-	// // Allocate a new 2MB stack.
-	// if pthread_attr_setstack(&attr, 0, 0x200000) != 0 {
-	// 	throw("pthread_attr_setstack")
-	// }
-	// // Read back the allocated stack.
-	// if pthread_attr_getstack(&attr, unsafe.Pointer(&mp.g0.stack.hi), &size) != 0 {
-	// 	throw("pthread_attr_getstack")
-	// }
-	mp.g0.stack.lo = mp.g0.stack.hi - uintptr(size)
+
 	if pthread_attr_setdetachstate(&attr, _PTHREAD_CREATE_DETACHED) != 0 {
 		throw("pthread_attr_setdetachstate")
 	}

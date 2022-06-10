@@ -83,6 +83,7 @@ const (
 	_F_SETFL    = 0x10
 	_F_SETFD    = 0x4
 
+	__SC_PAGESIZE = 0x1b
 	__SC_NPROCESSORS_ONLN = 0x23
 
 	_MAXHOSTNAMELEN = 0x100
@@ -101,7 +102,7 @@ type semt struct {
 type sigset uint64
 
 type stackt struct {
-	ss_sp     uintptr
+	ss_sp     *byte
 	ss_size   uintptr
 	ss_flags  int32
 	pad_cgo_0 [4]byte
@@ -124,12 +125,11 @@ type siginfo struct {
 }
 
 type sigactiont struct {
-	sa_flags  int32
-	pad_cgo_0 [4]byte
 	_funcptr  [8]byte
 	sa_mask   sigset
-	anon0     [8]byte
-	userdata  *byte
+	sa_flags  int32
+	pad_cgo_0 [4]byte
+	userdata  [8]byte
 }
 
 type extendedregs struct {

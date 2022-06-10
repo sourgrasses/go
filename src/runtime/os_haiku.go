@@ -27,7 +27,7 @@ type mOS struct {
 
 const (
 	_SS_DISABLE  = 4
-	_NSIG        = 65
+	_NSIG        = 33
 	_SI_USER     = 0
 	_SIG_SETMASK = 3 // Modified for Haiku support
 	_RLIMIT_AS   = 6 // Modified for Haiku support
@@ -45,6 +45,7 @@ var asmsysvicall6x libcFunc // name to take addr of asmsysvicall6
 func asmsysvicall6() // declared for vet; do NOT call
 
 //go:nosplit
+//go:cgo_unsafe_args
 func sysvicall0(fn *libcFunc) uintptr {
 	var libcall libcall
 	libcall.fn = uintptr(unsafe.Pointer(fn))
@@ -55,6 +56,7 @@ func sysvicall0(fn *libcFunc) uintptr {
 }
 
 //go:nosplit
+//go:cgo_unsafe_args
 func sysvicall1(fn *libcFunc, a1 uintptr) uintptr {
 	var libcall libcall
 	libcall.fn = uintptr(unsafe.Pointer(fn))
@@ -66,6 +68,7 @@ func sysvicall1(fn *libcFunc, a1 uintptr) uintptr {
 }
 
 //go:nosplit
+//go:cgo_unsafe_args
 func sysvicall2(fn *libcFunc, a1, a2 uintptr) uintptr {
 	var libcall libcall
 	libcall.fn = uintptr(unsafe.Pointer(fn))
@@ -76,6 +79,7 @@ func sysvicall2(fn *libcFunc, a1, a2 uintptr) uintptr {
 }
 
 //go:nosplit
+//go:cgo_unsafe_args
 func sysvicall3(fn *libcFunc, a1, a2, a3 uintptr) uintptr {
 	var libcall libcall
 	libcall.fn = uintptr(unsafe.Pointer(fn))

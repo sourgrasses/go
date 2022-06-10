@@ -1804,10 +1804,6 @@ func useAbs(ctxt *obj.Link, s *obj.LSym) bool {
 		// All the Solaris dynamic imports from libc.so begin with "libc_".
 		return strings.HasPrefix(s.Name, "libc_")
 	}
-	if ctxt.Headtype == objabi.Hhaiku {
-		// All the Haiku dynamic imports from libroot.so begin with "libroot_".
-		return strings.HasPrefix(s.Name, "libroot_")
-	}
 	return ctxt.Arch.Family == sys.I386 && !ctxt.Flag_shared
 }
 

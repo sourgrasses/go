@@ -601,6 +601,26 @@ func elfWriteMipsAbiFlags(ctxt *Link) int {
 	return int(sh.Size)
 }
 
+
+var ELF_COMMENT_HAIKU = "GCC: (GNU) 11.2.0"
+
+func elfhaikucomment(sh *ElfShdr, startva uint64, resoff uint64) int {
+	n := len(ELF_COMMENT_HAIKU) + 1
+	sh.Addr = startva + resoff - uint64(n)
+	sh.Off = resoff - uint64(n)
+	sh.Size = uint64(n)
+
+	return n
+}
+
+func elfwritehaikucomment(out *OutBuf) int {
+	sh := elfshname(".comment")
+	out.SeekSet(int64(sh.Off))
+	out.WriteString(ELF_COMMENT_HAIKU)
+	out.Write8(0)
+	return int(sh.Size)
+}
+
 func elfnote(sh *ElfShdr, startva uint64, resoff uint64, sz int) int {
 	n := 3*4 + uint64(sz) + resoff%4
 
@@ -1318,6 +1338,9 @@ func (ctxt *Link) doelf() {
 	if ctxt.IsOpenbsd() {
 		shstrtab.Addstring(".note.openbsd.ident")
 	}
+	if ctxt.IsHaiku() {
+		shstrtab.Addstring(".comment")
+	}
 	if len(buildinfo) > 0 {
 		shstrtab.Addstring(".note.gnu.build-id")
 	}
@@ -1820,6 +1843,22 @@ func asmbElf(ctxt *Link) {
 		phsh(pnotei, sh)
 	}
 
+	if ctxt.HeadType == objabi.Hhaiku {
+		sh := elfshname(".comment")
+
+		sh.Type = uint32(elf.SHT_PROGBITS)
+		sh.Flags = uint64(elf.SHF_MERGE | elf.SHF_STRINGS)
+		sh.Addralign = 1
+		sh.Entsize = 1
+
+		resoff -= int64(elfhaikucomment(sh, uint64(startva), uint64(resoff)))
+
+		ph := newElfPhdr()
+		ph.Type = elf.PT_NOTE
+		ph.Flags = 0
+		phsh(ph, sh)
+	}
+
 	if len(buildinfo) > 0 {
 		sh := elfshname(".note.gnu.build-id")
 		resoff -= int64(elfbuildinfo(sh, uint64(startva), uint64(resoff)))
@@ -2199,6 +2238,9 @@ elfobj:
 		if *flagBuildid != "" {
 			a += int64(elfwritegobuildid(ctxt.Out))
 		}
+	}
+	if ctxt.HeadType == objabi.Hhaiku {
+		a += int64(elfwritehaikucomment(ctxt.Out))
 	}
 	if *flagRace && ctxt.IsNetbsd() {
 		a += int64(elfwritenetbsdpax(ctxt.Out))

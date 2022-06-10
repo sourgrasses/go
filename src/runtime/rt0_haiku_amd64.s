@@ -5,7 +5,7 @@
 #include "textflag.h"
 
 TEXT _rt0_amd64_haiku(SB),NOSPLIT,$-8
-	JMP	_rt0_amd64(SB)
+	JMP	runtime·rt0_go(SB)
 
 TEXT _rt0_amd64_haiku_lib(SB),NOSPLIT,$0
 	JMP	_rt0_amd64_lib(SB)
