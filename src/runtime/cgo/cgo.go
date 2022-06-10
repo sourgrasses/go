@@ -22,14 +22,13 @@ package cgo
 #cgo aix LDFLAGS: -Wl,-berok
 #cgo solaris LDFLAGS: -lxnet
 #cgo solaris LDFLAGS: -lsocket
+#cgo haiku LDFLAGS: -lroot -lbsd -lnetwork
 
 // We use -fno-stack-protector because internal linking won't find
 // the support functions. See issues #52919 and #54313.
 #cgo CFLAGS: -Wall -Werror -fno-stack-protector
 
 #cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
-
-#cgo haiku LDFLAGS: -lroot -lbsd
 
 */
 import "C"
