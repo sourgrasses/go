@@ -127,6 +127,11 @@ var (
 	libc_area_for libcFunc
 )
 
+const (
+	_CLOCK_REALTIME  = 0xffffffff
+)
+
+
 var sigset_all = sigset(0)
 var sigset_none = sigset(0)
 
@@ -359,37 +364,35 @@ func semacreate(mp *m) {
 
 //go:nosplit
 func semasleep(ns int64) int32 {
-	_m_ := getg().m
+	mp := getg().m
 	if ns >= 0 {
-		_m_.ts.tv_sec = ns / 1000000000
-		_m_.ts.tv_nsec = ns % 1000000000
+		var ts timespec
 
-		_m_.libcall.fn = uintptr(unsafe.Pointer(&libc_sem_timedwait))
-		_m_.libcall.n = 2
-		_m_.scratch = mscratch{}
-		_m_.scratch.v[0] = _m_.waitsema
-		_m_.scratch.v[1] = uintptr(unsafe.Pointer(&_m_.ts))
-		_m_.libcall.args = uintptr(unsafe.Pointer(&_m_.scratch))
-		asmcgocall(unsafe.Pointer(&asmsysvicall6x), unsafe.Pointer(&_m_.libcall))
-		if *_m_.perrno != 0 {
-			if *_m_.perrno == _ETIMEDOUT || *_m_.perrno == _EAGAIN || *_m_.perrno == _EINTR {
+		if clock_gettime(_CLOCK_REALTIME, &ts) != 0 {
+			throw("clock_gettime")
+		}
+		ts.tv_sec += ns / 1e9
+		ts.tv_nsec += ns % 1e9
+		if ts.tv_nsec >= 1e9 {
+			ts.tv_sec++
+			ts.tv_nsec -= 1e9
+		}
+
+		if r, err := sem_timedwait((*semt)(unsafe.Pointer(mp.waitsema)), &ts); r != 0 {
+			if err == _ETIMEDOUT || err == _EAGAIN || err == _EINTR {
 				return -1
 			}
-			throw("sem_reltimedwait_np")
+			println("sem_timedwait err ", err, " ts.tv_sec ", ts.tv_sec, " ts.tv_nsec ", ts.tv_nsec, " ns ", ns, " id ", mp.id)
+			throw("sem_timedwait")
 		}
 		return 0
 	}
 	for {
-		_m_.libcall.fn = uintptr(unsafe.Pointer(&libc_sem_wait))
-		_m_.libcall.n = 1
-		_m_.scratch = mscratch{}
-		_m_.scratch.v[0] = _m_.waitsema
-		_m_.libcall.args = uintptr(unsafe.Pointer(&_m_.scratch))
-		asmcgocall(unsafe.Pointer(&asmsysvicall6x), unsafe.Pointer(&_m_.libcall))
-		if _m_.libcall.r1 == 0 {
+		r1, err := sem_wait((*semt)(unsafe.Pointer(mp.waitsema)))
+		if r1 == 0 {
 			break
 		}
-		if *_m_.perrno == _EINTR {
+		if err == _EINTR {
 			continue
 		}
 		throw("sem_wait")
@@ -468,6 +471,17 @@ func fcntl(fd, cmd, arg int32) int32 {
 }
 
 //go:nosplit
+func closeonexec(fd int32) {
+	fcntl(fd, _F_SETFD, _FD_CLOEXEC)
+}
+
+//go:nosplit
+func setNonblock(fd int32) {
+	flags := fcntl(fd, _F_GETFL, 0)
+	fcntl(fd, _F_SETFL, flags|_O_NONBLOCK)
+}
+
+//go:nosplit
 func open(path *byte, mode, perm int32) int32 {
 	return int32(sysvicall3(&libc_open, uintptr(unsafe.Pointer(path)), uintptr(mode), uintptr(perm)))
 }
@@ -530,14 +544,22 @@ func sem_post(sem *semt) int32 {
 	return int32(sysvicall1(&libc_sem_post, uintptr(unsafe.Pointer(sem))))
 }
 
-// //go:nosplit
-// func sem_reltimedwait_np(sem *semt, timeout *timespec) int32 {
-// 	return int32(sysvicall2(&libc_sem_reltimedwait_np, uintptr(unsafe.Pointer(sem)), uintptr(unsafe.Pointer(timeout))))
-// }
+//go:nosplit
+func sem_wait(sem *semt) (int32, int32) {
+	r, err := sysvicall1Err(&libc_sem_wait, uintptr(unsafe.Pointer(sem)))
+	return int32(r), int32(err)
+}
 
 //go:nosplit
-func sem_wait(sem *semt) int32 {
-	return int32(sysvicall1(&libc_sem_wait, uintptr(unsafe.Pointer(sem))))
+func sem_timedwait(sem *semt, timeout *timespec) (int32, int32) {
+	r, err := sysvicall2Err(&libc_sem_timedwait, uintptr(unsafe.Pointer(sem)), uintptr(unsafe.Pointer(timeout)))
+	return int32(r), int32(err)
+}
+
+//go:nosplit
+func clock_gettime(clockid uint32, tp *timespec) int32 {
+	r := sysvicall2(&libc_clock_gettime, uintptr(clockid), uintptr(unsafe.Pointer(tp)))
+	return int32(r)
 }
 
 func setitimer(which int32, value *itimerval, ovalue *itimerval) /* int32 */ {
@@ -566,16 +588,16 @@ func sysconf(name int32) int64 {
 	return int64(sysvicall1(&libc_sysconf, uintptr(name)))
 }
 
-func usleep1(usec uint32)
+//func usleep1(usec uint32)
 
 //go:nosplit
 func usleep_no_g(usec uint32) {
-	usleep1(usec)
+	sysvicall1(&libc_usleep, uintptr(usec))
 }
 
 //go:nosplit
-func usleep(µs uint32) {
-	usleep1(µs)
+func usleep(usec uint32) {
+	sysvicall1(&libc_usleep, uintptr(usec))
 }
 
 func walltime() (sec int64, nsec int32) {

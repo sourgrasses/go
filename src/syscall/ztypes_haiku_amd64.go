@@ -41,6 +41,8 @@ type Rlimit struct {
 	Max uint64
 }
 
+type _Pid_t int32
+
 type _Gid_t uint32
 
 type Stat_t struct {
@@ -79,7 +81,7 @@ type Dirent struct {
 	Ino       int64
 	Pino      int64
 	Reclen    uint16
-	Name      [1 + 256]int8
+	Name      [1 + 256]byte
 	Pad_cgo_0 [1]byte
 }
 
