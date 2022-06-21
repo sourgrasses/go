@@ -158,7 +158,7 @@ func osinit() {
 	}
 }
 
-func tstart_sysvicall()
+func tstart_sysvicall(newm *m) uint32
 
 // May run with m.p==nil, so write barriers are not allowed.
 //go:nowritebarrier
@@ -588,7 +588,7 @@ func sysconf(name int32) int64 {
 	return int64(sysvicall1(&libc_sysconf, uintptr(name)))
 }
 
-//func usleep1(usec uint32)
+func usleep1(usec uint32)
 
 //go:nosplit
 func usleep_no_g(usec uint32) {

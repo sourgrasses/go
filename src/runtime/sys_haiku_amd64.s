@@ -327,7 +327,7 @@ usleep1_noswitch:
 	RET
 
 // Runs on OS stack. duration (in µs units) is in DI.
-TEXT runtime·usleep2(SB),NOSPLIT,$0
+TEXT usleep2<>(SB),NOSPLIT,$0
 	LEAQ	libc_usleep(SB), AX
 	CALL	AX
 	RET

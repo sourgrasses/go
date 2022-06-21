@@ -30,6 +30,7 @@ var (
 //go:linkname pipe1x runtime.pipe1
 var pipe1x libcFunc // name to take addr of pipe1
 
+func pipe1() // declared for vet; do NOT call
 
 //go:nosplit
 //go:linkname syscall_sysvicall6
