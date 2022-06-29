@@ -245,43 +245,14 @@ func minit() {
 	getg().m.procid = uint64(pthread_self())
 }
 
-
 // Called from dropm to undo the effect of an minit.
 func unminit() {
-	if getg().m.newSigstack {
-		signalstack(nil)
-	}
+	unminitSignals()
 }
 
-func memlimit() uintptr {
-	/*
-		TODO: Convert to Go when something actually uses the result.
-		Rlimit rl;
-		extern byte runtime·text[], runtime·end[];
-		uintptr used;
-
-		if(runtime·getrlimit(RLIMIT_AS, &rl) != 0)
-			return 0;
-		if(rl.rlim_cur >= 0x7fffffff)
-			return 0;
-
-		// Estimate our VM footprint excluding the heap.
-		// Not an exact science: use size of binary plus
-		// some room for thread stacks.
-		used = runtime·end - runtime·text + (64<<20);
-		if(used >= rl.rlim_cur)
-			return 0;
-
-		// If there's not at least 16 MB left, we're probably
-		// not going to be able to do much. Treat as no limit.
-		rl.rlim_cur -= used;
-		if(rl.rlim_cur < (16<<20))
-			return 0;
-
-		return rl.rlim_cur - used;
-	*/
-
-	return 0
+// Called from exitm, but not from drop, to undo the effect of thread-owned
+// resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
+func mdestroy(mp *m) {
 }
 
 func sigtramp()
@@ -609,11 +580,6 @@ func walltime() (sec int64, nsec int32) {
 //go:nosplit
 func write1(fd uintptr, buf unsafe.Pointer, nbyte int32) int32 {
 	return int32(sysvicall3(&libc_write, uintptr(fd), uintptr(buf), uintptr(nbyte)))
-}
-
-// Called from exitm, but not from drop, to undo the effect of thread-owned
-// resources in minit, semacreate, or elsewhere. Do not take locks after calling this.
-func mdestroy(mp *m) {
 }
 
 func osyield1()

@@ -46,6 +46,7 @@ func sysFault(v unsafe.Pointer, n uintptr) {
 
 // Indicates not to reserve swap space for the mapping.
 const _sunosMAP_NORESERVE = 0x40
+const _haikuMAP_NORESERVE = 0x10
 
 func sysReserve(v unsafe.Pointer, n uintptr) unsafe.Pointer {
 	flags := int32(_MAP_ANON | _MAP_PRIVATE)
@@ -54,6 +55,12 @@ func sysReserve(v unsafe.Pointer, n uintptr) unsafe.Pointer {
 		// for PROT_NONE anonymous mappings. This avoids an issue
 		// wherein large mappings can cause fork to fail.
 		flags |= _sunosMAP_NORESERVE
+	}
+	if GOOS == "haiku" {
+		// Be explicit that we don't want to reserve swap space
+		// for PROT_NONE anonymous mappings. This avoids an issue
+		// wherein large mappings can cause fork to fail.
+		flags |= _haikuMAP_NORESERVE
 	}
 	p, err := mmap(v, n, _PROT_NONE, flags, -1, 0)
 	if err != 0 {
