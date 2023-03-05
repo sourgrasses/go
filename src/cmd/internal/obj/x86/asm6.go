@@ -3727,7 +3727,7 @@ func (ab *AsmBuf) asmandsz(ctxt *obj.Link, cursym *obj.LSym, p *obj.Prog, a *obj
 	}
 
 	if REG_AX <= base && base <= REG_R15 {
-		if a.Index == REG_TLS && !ctxt.Flag_shared && !isAndroid && !isHaiku
+		if a.Index == REG_TLS && !ctxt.Flag_shared && !isAndroid && !isHaiku &&
 			!(ctxt.Headtype == objabi.Hwindows && ctxt.Arch.Family == sys.AMD64) {
 			rel = obj.Reloc{}
 			rel.Type = objabi.R_TLS_LE
@@ -5196,7 +5196,6 @@ func (ab *AsmBuf) doasm(ctxt *obj.Link, cursym *obj.LSym, p *obj.Prog) {
 						ab.Put2(0x64, // FS
 							0x8B)
 						ab.asmand(ctxt, cursym, p, &pp.From, &p.To)
-
 
 					case objabi.Hplan9:
 						pp.From = obj.Addr{}
