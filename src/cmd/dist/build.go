@@ -982,6 +982,7 @@ var unixOS = map[string]bool{
 	"darwin":    true,
 	"dragonfly": true,
 	"freebsd":   true,
+	"haiku":     true,
 	"hurd":      true,
 	"illumos":   true,
 	"ios":       true,
