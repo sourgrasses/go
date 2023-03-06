@@ -4,5 +4,6 @@
 
 //go:build aix || (solaris && !illumos)
 
-type inode = uint64 // type of syscall.Stat_t.Ino
+package filelock
 
+type inode = uint64 // type of syscall.Stat_t.Ino
