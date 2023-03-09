@@ -6,6 +6,7 @@ package runtime
 
 import (
 	"internal/abi"
+	"runtime/internal/atomic"
 	"unsafe"
 )
 
@@ -128,9 +129,8 @@ var (
 )
 
 const (
-	_CLOCK_REALTIME  = 0xffffffff
+	_CLOCK_REALTIME = 0xffffffff
 )
-
 
 var sigset_all = sigset(0)
 var sigset_none = sigset(0)
@@ -192,7 +192,6 @@ func newosproc(mp *m) {
 	}
 }
 
-
 var urandom_dev = []byte("/dev/random\x00")
 
 //go:nosplit
@@ -234,7 +233,6 @@ func sigdelset(mask *sigset, i int) {
 func (c *sigctxt) fixsigcode(sig uint32) {
 }
 
-
 // Called to initialize a new m (including the bootstrap m).
 // Called on the new thread, cannot allocate memory.
 func minit() {
@@ -270,7 +268,6 @@ func setsig(i uint32, fn uintptr) {
 	*((*uintptr)(unsafe.Pointer(&sa._funcptr))) = fn
 	sigaction(i, &sa, nil)
 }
-
 
 //go:nosplit
 //go:nowritebarrierrec
@@ -371,7 +368,7 @@ func semasleep(ns int64) int32 {
 	return 0
 }
 
-func exitThread(wait *uint32) {
+func exitThread(wait *atomic.Uint32) {
 	// We should never reach exitThread on Solaris because we let
 	// libc clean up threads.
 	throw("exitThread")
