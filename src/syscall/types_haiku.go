@@ -30,6 +30,7 @@ package syscall
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <sys/utsname.h>
 #include <sys/wait.h>
 #include <net/if.h>
 #include <net/if_dl.h>
@@ -106,7 +107,7 @@ type Dirent struct {
 	Ino       int64
 	Pino      int64
 	Reclen    uint16
-	Name      [1+256]int8
+	Name      [1 + 256]int8
 	Pad_cgo_0 [1]byte
 }
 
@@ -168,5 +169,9 @@ type Termios C.struct_termios
 // Fake constant needed by net package
 
 const (
-	SYS_EXECVE                             = 43
+	SYS_EXECVE = 43
 )
+
+// Uname
+
+type Utsname C.struct_utsname
