@@ -16,6 +16,7 @@ package runtime
 
 /*
 #include <sys/types.h>
+#include <fcntl.h>
 #include <sys/time.h>
 #include <signal.h>
 #include <errno.h>
@@ -114,11 +115,16 @@ const (
 
 	HOST_NAME_MAX = C.HOST_NAME_MAX
 
-	O_NONBLOCK = C.O_NONBLOCK
 	FD_CLOEXEC = C.FD_CLOEXEC
 	F_GETFL    = C.F_GETFL
 	F_SETFL    = C.F_SETFL
 	F_SETFD    = C.F_SETFD
+
+	O_WRONLY   = C.O_WRONLY
+	O_RDONLY   = C.O_RDONLY
+	O_CREAT    = C.O_CREAT
+	O_TRUNC    = C.O_TRUNC
+	O_NONBLOCK = C.O_NONBLOCK
 
 	_SC_NPROCESSORS_ONLN = C._SC_NPROCESSORS_ONLN
 
@@ -128,6 +134,7 @@ const (
 
 	B_ERROR = C.B_ERROR
 )
+
 type SemT C.sem_t
 
 type Sigset C.sigset_t
@@ -136,7 +143,6 @@ type StackT C.stack_t
 type Siginfo C.siginfo_t
 
 type SigactionT C.struct_sigaction
-
 
 type Mcontext C.mcontext_t
 type Ucontext C.ucontext_t
@@ -153,7 +159,6 @@ type ExtendedRegs C.struct_extended_regs
 // for amd64
 type XmmRegs C.struct_xmm_regs
 type FpuState C.struct_fpu_state
-
 
 type Pthread C.pthread_t
 type PthreadAttr C.pthread_attr_t

@@ -77,13 +77,18 @@ const (
 
 	_HOST_NAME_MAX = 0xff
 
-	_O_NONBLOCK = 0x80
 	_FD_CLOEXEC = 0x1
 	_F_GETFL    = 0x8
 	_F_SETFL    = 0x10
 	_F_SETFD    = 0x4
 
-	__SC_PAGESIZE = 0x1b
+	_O_WRONLY   = 0x1
+	_O_RDONLY   = 0x0
+	_O_CREAT    = 0x200
+	_O_TRUNC    = 0x400
+	_O_NONBLOCK = 0x80
+
+	__SC_PAGESIZE         = 0x1b
 	__SC_NPROCESSORS_ONLN = 0x23
 
 	_MAXHOSTNAMELEN = 0x100
