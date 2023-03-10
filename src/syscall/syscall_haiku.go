@@ -14,6 +14,9 @@ package syscall
 
 import "unsafe"
 
+// Never actually called, but exec_unix.go wants it to build
+func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
+
 // Implemented in asm_haiku_amd64.s.
 func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
 func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
