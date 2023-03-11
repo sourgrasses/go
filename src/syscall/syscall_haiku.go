@@ -18,6 +18,7 @@ import "unsafe"
 func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
 
 // Implemented in asm_haiku_amd64.s.
+func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
 func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
 func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
 
