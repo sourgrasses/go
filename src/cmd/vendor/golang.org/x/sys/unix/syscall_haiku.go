@@ -12,11 +12,14 @@
 
 package unix
 
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
 
 // Implemented in asm_haiku_amd64.s.
-func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
-func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
+func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.Errno)
+func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.Errno)
 
 // Constant expected by package but not supported
 const (
@@ -63,7 +66,7 @@ func Pipe(p []int) (err error) {
 	}
 	r0, w0, e1 := pipe()
 	if e1 != 0 {
-		err = Errno(e1)
+		err = syscall.Errno(e1)
 	}
 	if err == nil {
 		p[0], p[1] = int(r0), int(w0)
@@ -130,7 +133,7 @@ func Getsockname(fd int) (sa Sockaddr, err error) {
 	if err = getsockname(fd, &rsa, &len); err != nil {
 		return
 	}
-	return anyToSockaddr(&rsa)
+	return anyToSockaddr(fd, &rsa)
 }
 
 // The const provides a compile-time constant so clients
@@ -221,8 +224,8 @@ func (w WaitStatus) ExitStatus() int {
 
 func (w WaitStatus) Signaled() bool { return ((w >> 8) & mask) != 0 }
 
-func (w WaitStatus) Signal() Signal {
-	sig := Signal((w >> 8) & mask)
+func (w WaitStatus) Signal() syscall.Signal {
+	sig := syscall.Signal((w >> 8) & mask)
 	if sig == 0 {
 		return -1
 	}
@@ -235,11 +238,11 @@ func (w WaitStatus) Stopped() bool { return (w>>16)&mask != 0 }
 
 func (w WaitStatus) Continued() bool { return w&continued != 0 }
 
-func (w WaitStatus) StopSignal() Signal {
+func (w WaitStatus) StopSignal() syscall.Signal {
 	if !w.Stopped() {
 		return -1
 	}
-	return Signal(w>>16) & mask
+	return syscall.Signal(w>>16) & mask
 }
 
 func (w WaitStatus) TrapCause() int { return -1 }
@@ -249,7 +252,7 @@ func wait4(pid uintptr, wstatus *WaitStatus, options uintptr, rusage *Rusage) (w
 func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error) {
 	r0, e1 := wait4(uintptr(pid), wstatus, uintptr(options), rusage)
 	if e1 != 0 {
-		err = Errno(e1)
+		err = syscall.Errno(e1)
 	}
 	return int(r0), err
 }
@@ -259,21 +262,43 @@ func gethostname() (name string, err uintptr)
 func Gethostname() (name string, err error) {
 	name, e1 := gethostname()
 	if e1 != 0 {
-		err = Errno(e1)
+		err = syscall.Errno(e1)
 	}
 	return name, err
 }
 
-func UtimesNano(path string, ts []Timespec) (err error) {
+//sys	utimes(path string, times *[2]Timeval) (err error)
+
+func Utimes(path string, tv []Timeval) error {
+	if tv == nil {
+		return utimes(path, nil)
+	}
+	if len(tv) != 2 {
+		return EINVAL
+	}
+	return utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
+}
+
+//sys	utimensat(fd int, path string, times *[2]Timespec, flag int) (err error)
+
+func UtimesNano(path string, ts []Timespec) error {
+	if ts == nil {
+		return utimensat(AT_FDCWD, path, nil, 0)
+	}
 	if len(ts) != 2 {
 		return EINVAL
 	}
-	var tv [2]Timeval
-	for i := 0; i < 2; i++ {
-		tv[i].Sec = ts[i].Sec
-		tv[i].Usec = int32(ts[i].Nsec / 1000)
+	return utimensat(AT_FDCWD, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), 0)
+}
+
+func UtimesNanoAt(dirfd int, path string, ts []Timespec, flags int) error {
+	if ts == nil {
+		return utimensat(dirfd, path, nil, flags)
 	}
-	return Utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
+	if len(ts) != 2 {
+		return EINVAL
+	}
+	return utimensat(dirfd, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), flags)
 }
 
 //sys	fcntl(fd int, cmd int, arg int) (val int, err error)
@@ -287,7 +312,7 @@ func FcntlFlock(fd uintptr, cmd int, lk *Flock_t) error {
 	return nil
 }
 
-func anyToSockaddr(rsa *RawSockaddrAny) (Sockaddr, error) {
+func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 	switch rsa.Addr.Family {
 	case AF_UNIX:
 		pp := (*RawSockaddrUnix)(unsafe.Pointer(rsa))
@@ -338,7 +363,7 @@ func Accept(fd int) (nfd int, sa Sockaddr, err error) {
 	if err != nil {
 		return
 	}
-	sa, err = anyToSockaddr(&rsa)
+	sa, err = anyToSockaddr(fd, &rsa)
 	if err != nil {
 		Close(nfd)
 		nfd = 0
@@ -346,59 +371,59 @@ func Accept(fd int) (nfd int, sa Sockaddr, err error) {
 	return
 }
 
-func recvmsgRaw(fd int, p, oob []byte, flags int, rsa *RawSockaddrAny) (n, oobn int, recvflags int, err error) {
+func recvmsgRaw(fd int, iov []Iovec, oob []byte, flags int, rsa *RawSockaddrAny) (n, oobn int, recvflags int, err error) {
 	var msg Msghdr
-	msg.Name = (*byte)(unsafe.Pointer(rsa)) // Hack types (*byte) to build on Haiku
+	msg.Name = (*byte)(unsafe.Pointer(rsa))
 	msg.Namelen = uint32(SizeofSockaddrAny)
-	var iov Iovec
-	if len(p) > 0 {
-		iov.Base = (*byte)(unsafe.Pointer(&p[0])) // Hack types (*byte) to build on Haiku
-		iov.SetLen(len(p))
-	}
-	var dummy byte // Hack types (*byte) to build on Haiku
+	var dummy byte
 	if len(oob) > 0 {
 		// receive at least one normal byte
-		if len(p) == 0 {
-			iov.Base = &dummy
-			iov.SetLen(1)
+		if emptyIovecs(iov) {
+			var iova [1]Iovec
+			iova[0].Base = &dummy
+			iova[0].SetLen(1)
+			iov = iova[:]
 		}
-		//msg.Accrights = (*int8)(unsafe.Pointer(&oob[0]))
+		msg.Controllen = uint32(len(oob))
 	}
-	msg.Iov = &iov
-	msg.Iovlen = 1
-	if n, err = recvmsg(fd, &msg, flags); err != nil {
+	if len(iov) > 0 {
+		msg.Iov = &iov[0]
+		msg.SetIovlen(len(iov))
+	}
+	if n, err = recvmsg(fd, &msg, flags); n == -1 {
 		return
 	}
-	oobn = 0 //int(msg.Accrightslen)
+	oobn = int(msg.Controllen)
 	return
 }
 
 //sys	sendmsg(s int, msg *Msghdr, flags int) (n int, err error) = libsocket.sendmsg
 
-func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags int) (n int, err error) {
+func sendmsgN(fd int, iov []Iovec, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags int) (n int, err error) {
 	var msg Msghdr
 	msg.Name = (*byte)(unsafe.Pointer(ptr))
 	msg.Namelen = uint32(salen)
-	var iov Iovec
-	if len(p) > 0 {
-		iov.Base = (*byte)(unsafe.Pointer(&p[0])) // Changed int8 to byte to build on Haiku
-		iov.SetLen(len(p))
-	}
-	var dummy byte // Changed int8 to byte to build on Haiku
+	var dummy byte
+	var empty bool
 	if len(oob) > 0 {
 		// send at least one normal byte
-		if len(p) == 0 {
-			iov.Base = &dummy
-			iov.SetLen(1)
+		empty = emptyIovecs(iov)
+		if empty {
+			var iova [1]Iovec
+			iova[0].Base = &dummy
+			iova[0].SetLen(1)
+			iov = iova[:]
 		}
-		//msg.Accrights = (*int8)(unsafe.Pointer(&oob[0]))
+		msg.Controllen = uint32(len(oob))
 	}
-	msg.Iov = &iov
-	msg.Iovlen = 1
+	if len(iov) > 0 {
+		msg.Iov = &iov[0]
+		msg.SetIovlen(len(iov))
+	}
 	if n, err = sendmsg(fd, &msg, flags); err != nil {
 		return 0, err
 	}
-	if len(oob) > 0 && len(p) == 0 {
+	if len(oob) > 0 && empty {
 		n = 0
 	}
 	return n, nil
@@ -432,7 +457,7 @@ func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags i
 //sysnb	Getrlimit(which int, lim *Rlimit) (err error)
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
-//sys	Kill(pid int, signum Signal) (err error)
+//sys	Kill(pid int, signum syscall.Signal) (err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
 //sys	Listen(s int, backlog int) (err error) = libsocket.listen
@@ -443,10 +468,10 @@ func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags i
 //sys	Open(path string, mode int, perm uint32) (fd int, err error)
 //sys	Openat(fd int, path string, flags int, perm uint32) (fdret int, err error)
 //sys	Pathconf(path string, name int) (val int, err error)
-//sys	Pread(fd int, p []byte, offset int64) (n int, err error)
-//sys	Pwrite(fd int, p []byte, offset int64) (n int, err error)
+//sys	pread(fd int, p []byte, offset int64) (n int, err error)
+//sys	pwrite(fd int, p []byte, offset int64) (n int, err error)
 //sys	read(fd int, p []byte) (n int, err error)
-//sys	Readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res Errno)
+//sys	Readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res syscall.Errno)
 //sys	Readlink(path string, buf []byte) (n int, err error)
 //sys	Rename(from string, to string) (err error)
 //sys	Rmdir(path string) (err error)
@@ -471,7 +496,6 @@ func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags i
 //sys	Umask(newmask int) (oldmask int)
 //sysnb	Uname(buf *Utsname) (err error)
 //sys	Unlink(path string) (err error)
-//sys	Utimes(path string, times *[2]Timeval) (err error)
 //sys	bind(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libsocket.bind
 //sys	connect(s int, addr unsafe.Pointer, addrlen _Socklen) (err error) = libsocket.connect
 //sys	mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)

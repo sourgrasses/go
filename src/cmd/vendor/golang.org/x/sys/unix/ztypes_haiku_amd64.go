@@ -193,6 +193,8 @@ type ICMPv6Filter struct {
 	Filt [8]uint32
 }
 
+type IPv6MTUInfo struct{}
+
 const (
 	SizeofSockaddrInet4    = 0x20
 	SizeofSockaddrInet6    = 0x1c
@@ -202,6 +204,7 @@ const (
 	SizeofLinger           = 0x8
 	SizeofIPMreq           = 0x8
 	SizeofIPv6Mreq         = 0x14
+	SizeofIPv6MTUInfo      = 0x00
 	SizeofMsghdr           = 0x30
 	SizeofCmsghdr          = 0xc
 	SizeofInet6Pktinfo     = 0x14
@@ -225,13 +228,21 @@ type Termios struct {
 }
 
 const (
+	AT_FDCWD            = -0x1
+	AT_EACCESS          = 0x8
+	AT_SYMLINK_NOFOLLOW = 0x1
+	AT_SYMLINK_FOLLOW   = 0x2
+	AT_REMOVEDIR        = 0x4
+)
+
+const (
 	SYS_EXECVE = 43
 )
 
 type Utsname struct {
-	Sysname  [32]int8
-	Nodename [32]int8
-	Release  [32]int8
-	Version  [32]int8
-	Machine  [32]int8
+	Sysname  [32]byte
+	Nodename [32]byte
+	Release  [32]byte
+	Version  [32]byte
+	Machine  [32]byte
 }
