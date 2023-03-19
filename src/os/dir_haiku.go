@@ -57,8 +57,7 @@ func (f *File) readdir(n int, mode readdirMode) (names []string, dirents []DirEn
 		if dirent.Ino == 0 {
 			continue
 		}
-		namlen := dirent.Reclen - uint16(unsafe.Offsetof(syscall.Dirent{}.Name))
-		name := dirent.Name[0 : namlen]
+		name := (*[len(syscall.Dirent{}.Name)]byte)(unsafe.Pointer(&dirent.Name))[:]
 		for i, c := range name {
 			if c == 0 {
 				name = name[:i]
