@@ -350,6 +350,16 @@ func Accept(fd int) (nfd int, sa Sockaddr, err error) {
 	return
 }
 
+// if flags is 0, then accept4() is the same as accept(), and we don't have
+// accept4() on haiku
+func Accept4(fd int, flags int) (int, Sockaddr, error) {
+	if flags != 0 {
+		return 0, nil, EINVAL
+	}
+
+	return Accept(fd)
+}
+
 func recvmsgRaw(fd int, p, oob []byte, flags int, rsa *RawSockaddrAny) (n, oobn int, recvflags int, err error) {
 	var msg Msghdr
 	msg.Name = (*byte)(unsafe.Pointer(rsa)) // Hack types (*byte) to build on Haiku
@@ -432,6 +442,7 @@ func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags i
 //sys	Getegid() (egid int)
 //sys	Getppid() (ppid int)
 //sys	Getpriority(which int, who int) (n int, err error)
+//sysnb	Getrusage(who int, rusage *Rusage) (err error)
 //sysnb	Getrlimit(which int, lim *Rlimit) (err error)
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
@@ -506,6 +517,20 @@ func writelen(fd int, buf *byte, nbuf int) (n int, err error) {
 		err = e1
 	}
 	return
+}
+
+var mapper = &mmapper{
+	active: make(map[*byte][]byte),
+	mmap:   mmap,
+	munmap: munmap,
+}
+
+func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
+	return mapper.Mmap(fd, offset, length, prot, flags)
+}
+
+func Munmap(b []byte) (err error) {
+	return mapper.Munmap(b)
 }
 
 func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
